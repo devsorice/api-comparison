@@ -1,13 +1,16 @@
-use log::{debug, error, log_enabled, info, Level};
+use axum::extract::Extension;
 use axum::{
-  body::Body,
-  http::StatusCode,
-  response::{IntoResponse, Response},
-  routing::{get, post},
-  Json, Router,
-  extract::{Path, Query}
+    body::Body,
+    extract::{Path, Query},
+    http::StatusCode,
+    response::{IntoResponse, Response},
+    Json,
 };
+use log::info;
 use serde::Serialize;
+use serde_json::json;
+use sqlx::PgPool;
+use sqlx::Row;
 
 #[derive(Serialize)]
 pub struct User {
@@ -18,9 +21,9 @@ pub struct User {
 
 // A handler /user/:id
 pub async fn get_user(Path(id): Path<u32>) -> String {
-  format!("User {}", id)
+    info!("Getting user {}", id);
+    return "".to_string();
 }
-
 
 // Handler for /create-user
 pub async fn create_user() -> impl IntoResponse {
@@ -30,19 +33,33 @@ pub async fn create_user() -> impl IntoResponse {
         .unwrap()
 }
 // Handler for /users
-pub async fn list_users() -> Json<Vec<User>> {
-    info!("Listing Users");
-    let users = vec![
-        User {
-            id: 1,
-            name: "Elijah".to_string(),
-            email: "elijah@example.com".to_string(),
-        },
-        User {
-            id: 2,
-            name: "John".to_string(),
-            email: "john@doe.com".to_string(),
-        },
-    ];
-    Json(users)
+pub async fn list_users(Extension(pool): Extension<PgPool>) -> impl IntoResponse {
+    info!("Listing users:");
+    let rows = match sqlx::query("SELECT id, name, email FROM users")
+        .fetch_all(&pool)
+        .await
+    {
+        Ok(rows) => {
+            // Log the user count
+            info!("Retrieved {} users", rows.len());
+            rows
+        }
+        Err(e) => {
+            log::error!("Error retrieving users: {:?}", e);
+            return (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response();
+        }
+    };
+
+    let users: Vec<serde_json::Value> = rows
+        .into_iter()
+        .map(|row| {
+            json!({
+                "id": row.try_get::<i32, _>("id").unwrap_or_default(),
+                "name": row.try_get::<String, _>("name").unwrap_or_default(),
+                "email": row.try_get::<String, _>("email").unwrap_or_default(),
+            })
+        })
+        .collect();
+
+    (StatusCode::OK, Json(users)).into_response()
 }
