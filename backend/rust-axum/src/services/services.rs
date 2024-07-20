@@ -1,23 +1,20 @@
-pub mod logger;
-pub mod database;
-
-use log::error;
-use sqlx::PgPool;
+use super::super::database::database::Database;
+use super::logging::Logger;
+use log::{error, info};
 use std::env;
-use self::database::Database;
 
 pub struct Services {
-    pub database_pool: PgPool,
-    pub version: String
+    pub version: String,
+    pub database: Database,
 }
 
 impl Services {
     pub async fn init() -> Self {
+        info!("--------- Initializing Services....");
         // Initialize logger
-        logger::Logger::init();
+        Logger::init();
 
-        let version = env!("CARGO_PKG_VERSION");
-        info!("Starting Crud Api - version: {}", version);
+        let version = env!("CARGO_PKG_VERSION").to_string();
 
         // Read environment variables
         let username = env::var("POSTGRES_USER").unwrap_or_else(|e| {
@@ -35,13 +32,16 @@ impl Services {
             panic!("POSTGRES_HOST not set");
         });
 
-        let port: u16 = env::var("POSTGRES_PORT").unwrap_or_else(|e| {
-            error!("POSTGRES_PORT not set: {}", e);
-            panic!("POSTGRES_PORT not set");
-        }).parse().unwrap_or_else(|e| {
-            error!("POSTGRES_PORT must be a number: {}", e);
-            panic!("POSTGRES_PORT must be a number");
-        });
+        let port: u16 = env::var("POSTGRES_PORT")
+            .unwrap_or_else(|e| {
+                error!("POSTGRES_PORT not set: {}", e);
+                panic!("POSTGRES_PORT not set");
+            })
+            .parse()
+            .unwrap_or_else(|e| {
+                error!("POSTGRES_PORT must be a number: {}", e);
+                panic!("POSTGRES_PORT must be a number");
+            });
 
         let database_name = env::var("POSTGRES_DB").unwrap_or_else(|e| {
             error!("POSTGRES_DB not set: {}", e);
@@ -49,8 +49,8 @@ impl Services {
         });
 
         // Initialize database pool
-        let database_pool = Database::init_pool(&username, &password, &hostname, port, &database_name).await;
+        let database = Database::init(&username, &password, &hostname, port, &database_name).await;
 
-        Services { version, database_pool }
+        Services { version, database }
     }
 }

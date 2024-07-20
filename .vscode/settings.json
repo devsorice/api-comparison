@@ -11,6 +11,9 @@
   "rust-analyzer.showUnlinkedFileNotification": false,
   "rust-analyzer.checkOnSave": true,
   "rust-analyzer.check.command": "clippy",
+  "rust-analyzer.linkedProjects": [
+    "./backend/rust-axum/Cargo.toml"
+  ],
   "terminal.integrated.env.windows": {
     "POSTGRES_USER": "test",
     "POSTGRES_PASSWORD": "test",
