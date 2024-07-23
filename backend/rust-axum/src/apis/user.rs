@@ -1,6 +1,6 @@
 use crate::database::crud::{CrudModel, CrudService};
 use async_trait::async_trait;
-use axum::{extract::Path, http::StatusCode, response::IntoResponse, Extension, Json};
+use axum::{extract::Json, extract::Path, http::StatusCode, response::IntoResponse, Extension};
 use serde::{Deserialize, Serialize};
 use sqlx::{query::Query, PgPool, Postgres};
 
@@ -59,22 +59,24 @@ pub async fn get_user_handler(
 }
 
 pub async fn create_user_handler(
-    Json(input): Json<User>,
     Extension(pool): Extension<PgPool>,
+    axum::extract::Json(input): axum::extract::Json<User>,
 ) -> impl IntoResponse {
     let service = CrudService::<User>::new(pool);
-    match service.create(convert_json(Json(input))).await {
+    let input = convert_json(Json(input));
+    match service.create(input).await {
         Ok(id) => (StatusCode::CREATED, id).into_response(),
         Err(status) => (status, "Error creating user").into_response(),
     }
 }
 
 pub async fn create_users_handler(
-    Json(inputs): Json<Vec<User>>,
     Extension(pool): Extension<PgPool>,
+    Json(inputs): Json<Vec<User>>,
 ) -> impl IntoResponse {
     let service = CrudService::<User>::new(pool);
-    match service.create_many(convert_json(Json(inputs))).await {
+    let inputs = convert_json(Json(inputs));
+    match service.create_many(inputs).await {
         Ok(ids) => (StatusCode::CREATED, ids).into_response(),
         Err(status) => (status, "Error creating users").into_response(),
     }
@@ -100,23 +102,25 @@ pub async fn delete_user_handler(
 }
 
 pub async fn update_user_handler(
-    Path(id): Path<i32>, // Updated to i32
-    Json(input): Json<User>,
+    Path(id): Path<i32>,
     Extension(pool): Extension<PgPool>,
+    Json(input): Json<User>,
 ) -> impl IntoResponse {
     let service = CrudService::<User>::new(pool);
-    match service.update(id, convert_json(Json(input))).await {
+    let input = convert_json(Json(input));
+    match service.update(id, input).await {
         Ok(_) => (StatusCode::OK, "User updated successfully").into_response(),
         Err(status) => (status, "Error updating user").into_response(),
     }
 }
 
 pub async fn update_users_handler(
-    Json(inputs): Json<Vec<(i32, User)>>, // Updated to i32
     Extension(pool): Extension<PgPool>,
+    Json(inputs): Json<Vec<(i32, User)>>,
 ) -> impl IntoResponse {
     let service = CrudService::<User>::new(pool);
-    match service.update_many(convert_json(Json(inputs))).await {
+    let inputs = convert_json(Json(inputs));
+    match service.update_many(inputs).await {
         Ok(_) => (StatusCode::OK, "Users updated successfully").into_response(),
         Err(status) => (status, "Error updating users").into_response(),
     }
