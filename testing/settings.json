@@ -1,0 +1,13 @@
+{
+  "num_initial_users": 10,
+  "routes": {
+    "get_user": 2,
+    "create_user": 1,
+    "create_users": 1,
+    "list_users": 1,
+    "delete_user": 1,
+    "update_user": 1,
+    "update_users": 1,
+    "duplicate_user": 1
+  }
+}
