@@ -1,5 +1,5 @@
 import { component$ } from '@builder.io/qwik';
-import { Sidebar } from './Sidebar';
+import Sidebar from './Sidebar';
 import { Header } from './Header';
 import { MainContent } from './MainContent';
 

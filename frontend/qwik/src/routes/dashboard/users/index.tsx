@@ -1,5 +1,17 @@
+import { component$ } from '@builder.io/qwik';
 import { routeLoader$ } from '@builder.io/qwik-city';
 import type { User } from '~/interfaces/user';
+import Users from '~/components/users/users';
+
+
+export default component$(() => {
+  return (
+    <div class="container container-flex">
+      <Users />
+    </div>
+  );
+});
+
 
 export const useUsersLoader = routeLoader$(async ({ cacheControl }) => {
   // Set the cache control headers

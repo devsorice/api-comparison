@@ -1,13 +1,15 @@
-import { component$ } from "@builder.io/qwik";
-import { isDev } from "@builder.io/qwik/build";
+import { FlowbiteProvider, FlowbiteProviderHeader } from 'flowbite-qwik';
+
+import { component$ } from '@builder.io/qwik';
+import { isDev } from '@builder.io/qwik/build';
 import {
   QwikCityProvider,
   RouterOutlet,
   ServiceWorkerRegister,
-} from "@builder.io/qwik-city";
-import { RouterHead } from "./components/router-head/router-head";
+} from '@builder.io/qwik-city';
+import { RouterHead } from './components/router-head/router-head';
 
-import "./global.css";
+import './global.css';
 
 export default component$(() => {
   /**
@@ -27,11 +29,14 @@ export default component$(() => {
             href={`${import.meta.env.BASE_URL}manifest.json`}
           />
         )}
+        <FlowbiteProviderHeader />
         <RouterHead />
         {!isDev && <ServiceWorkerRegister />}
       </head>
       <body lang="en">
-        <RouterOutlet />
+        <FlowbiteProvider theme="blue" toastPosition="top-right">
+          <RouterOutlet />
+        </FlowbiteProvider>
       </body>
     </QwikCityProvider>
   );
