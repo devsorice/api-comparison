@@ -39,10 +39,10 @@ impl<T: CrudModel> CrudService<T> {
         }
     }
 
-    pub async fn get(&self, id: i32) -> Result<Json<T>, StatusCode> {
+    pub async fn get(&self, id: i32) -> Result<Json<T>, AppError> {
         let query = format!(
             "SELECT {} FROM {} WHERE {} = $1",
-            T::fields().join(", "),
+            T::list_fields().join(", "),
             T::table_name(),
             T::id_field()
         );
@@ -51,14 +51,13 @@ impl<T: CrudModel> CrudService<T> {
             .bind(id)
             .fetch_one(&self.pool)
             .await
-            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+            .map_err(AppError::DatabaseError)?;
 
-        let model: T = serde_json::from_value(row.try_get("json").unwrap())
-            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+        let model = T::from_row(&row)?;
         Ok(Json(model))
     }
 
-    pub async fn create(&self, model: T) -> Result<Json<i64>, AppError> {
+    pub async fn create(&self, model: T) -> Result<Json<i32>, AppError> {
         let query = format!(
             "INSERT INTO {} ({}) VALUES ({}) RETURNING {}",
             T::table_name(),
@@ -77,7 +76,9 @@ impl<T: CrudModel> CrudService<T> {
             .await
             .map_err(AppError::DatabaseError)?;
 
-        let id: i64 = row.try_get("id").unwrap_or_default();
+        let id: i32 = row
+            .try_get(T::id_field())
+            .map_err(|e| AppError::DatabaseError(e.into()))?;
         Ok(Json(id))
     }
 
@@ -209,7 +210,7 @@ impl<T: CrudModel> CrudService<T> {
         Ok(StatusCode::OK)
     }
 
-    pub async fn duplicate(&self, id: i32) -> Result<Json<i64>, AppError> {
+    pub async fn duplicate(&self, id: i32) -> Result<Json<i32>, AppError> {
         let query = format!(
             "SELECT {} FROM {} WHERE {} = $1",
             T::fields().join(", "),

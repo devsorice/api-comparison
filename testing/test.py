@@ -43,8 +43,9 @@ def create_initial_users(base_url, num_initial_users):
         user_data = generate_random_user()
         logging.info(f"Creating user: {user_data}")
         response, response_body = send_request("POST", f"{base_url}/user/create-one", user_data)
-        if response.status == 201:
-            created_user_ids.append(response_body)
+        if response.status == 201 and 'data' in response_body and isinstance(response_body['data'], int):
+            logging.info(f"User created with id: {response_body['data']}")
+            created_user_ids.append(response_body['data'])
         else:
             logging.error("------")
             logging.error("Failed to create initial user.")
