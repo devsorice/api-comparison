@@ -1,7 +1,7 @@
 import { component$ } from '@builder.io/qwik';
 import { useUsersLoader } from '../../routes/dashboard/users';
 import type { User } from '~/interfaces/user';
-
+import "./users.css";
 
 
 export default component$(() => {
@@ -13,7 +13,7 @@ export default component$(() => {
       {users.length === 0 ? (
         <p>Loading...</p>
       ) : (
-        <table class="min-w-full bg-white">
+        <table class="users min-w-full bg-white">
           <thead>
             <tr>
               <th class="py-2">ID</th>

@@ -1,4 +1,4 @@
-import { component$ } from '@builder.io/qwik';
+import { component$, Slot } from '@builder.io/qwik';
 import Sidebar from './Sidebar';
 import { Header } from './Header';
 import { MainContent } from './MainContent';
@@ -10,6 +10,7 @@ export const Dashboard = component$(() => {
       <div class="main-area">
         <Header />
         <MainContent />
+        <Slot />
       </div>
     </div>
   );
