@@ -7,8 +7,10 @@ use sqlx::{query::Query, PgPool, Postgres};
 
 #[derive(Serialize, Deserialize)]
 pub struct User {
-    pub id: i32,
-    pub name: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub id: Option<i32>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub name: Option<String>,
     pub email: String,
 }
 
@@ -47,7 +49,12 @@ fn convert_json<T>(json: Json<T>) -> T {
     json.0
 }
 
-fn response<T>(status: &str, error: bool, data: Option<axum::Json<T>>) -> Json<serde_json::Value>
+fn response<T>(
+    status: &str,
+    error: bool,
+    data: Option<axum::Json<T>>,
+    message: Option<&str>,
+) -> Json<serde_json::Value>
 where
     T: Serialize,
 {
@@ -55,7 +62,8 @@ where
     Json(json!({
         "status": status,
         "error": error,
-        "data": data
+        "data": data,
+        "message":message
     }))
 }
 
@@ -65,10 +73,15 @@ pub async fn get_user_handler(
 ) -> impl IntoResponse {
     let service = CrudService::<User>::new(pool);
     match service.get(id).await {
-        Ok(user) => (StatusCode::OK, response("success", false, Some(user))).into_response(),
-        Err(_) => (
+        Ok(user) => (StatusCode::OK, response("success", false, Some(user), None)).into_response(),
+        Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
-            response::<User>("error", true, None),
+            response::<User>(
+                "error",
+                true,
+                None,
+                Some(&format!("Failed to get user: {}", e)),
+            ),
         )
             .into_response(),
     }
@@ -81,10 +94,19 @@ pub async fn create_user_handler(
     let service = CrudService::<User>::new(pool);
     let input = convert_json(Json(input));
     match service.create(input).await {
-        Ok(id) => (StatusCode::CREATED, response("success", false, Some(id))).into_response(),
-        Err(_) => (
+        Ok(id) => (
+            StatusCode::CREATED,
+            response("success", false, Some(id), None),
+        )
+            .into_response(),
+        Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
-            response::<i64>("error", true, None),
+            response::<i64>(
+                "error",
+                true,
+                None,
+                Some(&format!("Failed to create user: {}", e)),
+            ),
         )
             .into_response(),
     }
@@ -97,10 +119,19 @@ pub async fn create_users_handler(
     let service = CrudService::<User>::new(pool);
     let inputs = convert_json(Json(inputs));
     match service.create_many(inputs).await {
-        Ok(ids) => (StatusCode::CREATED, response("success", false, Some(ids))).into_response(),
-        Err(_) => (
+        Ok(ids) => (
+            StatusCode::CREATED,
+            response("success", false, Some(ids), None),
+        )
+            .into_response(),
+        Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
-            response::<Vec<i64>>("error", true, None),
+            response::<Vec<i64>>(
+                "error",
+                true,
+                None,
+                Some(&format!("Failed to create users: {}", e)),
+            ),
         )
             .into_response(),
     }
@@ -109,10 +140,19 @@ pub async fn create_users_handler(
 pub async fn list_users_handler(Extension(pool): Extension<PgPool>) -> impl IntoResponse {
     let service = CrudService::<User>::new(pool);
     match service.list().await {
-        Ok(users) => (StatusCode::OK, response("success", false, Some(users))).into_response(),
-        Err(_) => (
+        Ok(users) => (
+            StatusCode::OK,
+            response("success", false, Some(users), None),
+        )
+            .into_response(),
+        Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
-            response::<Vec<User>>("error", true, None),
+            response::<Vec<User>>(
+                "error",
+                true,
+                None,
+                Some(&format!("Failed to list users: {}", e)),
+            ),
         )
             .into_response(),
     }
@@ -124,10 +164,15 @@ pub async fn delete_user_handler(
 ) -> impl IntoResponse {
     let service = CrudService::<User>::new(pool);
     match service.delete(id).await {
-        Ok(_) => (StatusCode::OK, response::<()>("success", false, None)).into_response(),
-        Err(_) => (
+        Ok(_) => (StatusCode::OK, response::<()>("success", false, None, None)).into_response(),
+        Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
-            response::<()>("error", true, None),
+            response::<()>(
+                "error",
+                true,
+                None,
+                Some(&format!("Failed to delete user: {}", e)),
+            ),
         )
             .into_response(),
     }
@@ -141,10 +186,15 @@ pub async fn update_user_handler(
     let service = CrudService::<User>::new(pool);
     let input = convert_json(Json(input));
     match service.update(id, input).await {
-        Ok(_) => (StatusCode::OK, response::<()>("success", false, None)).into_response(),
-        Err(_) => (
+        Ok(_) => (StatusCode::OK, response::<()>("success", false, None, None)).into_response(),
+        Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
-            response::<()>("error", true, None),
+            response::<()>(
+                "error",
+                true,
+                None,
+                Some(&format!("Failed to update user: {}", e)),
+            ),
         )
             .into_response(),
     }
@@ -157,10 +207,15 @@ pub async fn update_users_handler(
     let service = CrudService::<User>::new(pool);
     let inputs = convert_json(Json(inputs));
     match service.update_many(inputs).await {
-        Ok(_) => (StatusCode::OK, response::<()>("success", false, None)).into_response(),
-        Err(_) => (
+        Ok(_) => (StatusCode::OK, response::<()>("success", false, None, None)).into_response(),
+        Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
-            response::<()>("error", true, None),
+            response::<()>(
+                "error",
+                true,
+                None,
+                Some(&format!("Failed to update users: {}", e)),
+            ),
         )
             .into_response(),
     }
@@ -174,12 +229,17 @@ pub async fn duplicate_user_handler(
     match service.duplicate(id).await {
         Ok(new_id) => (
             StatusCode::CREATED,
-            response("success", false, Some(new_id)),
+            response("success", false, Some(new_id), None),
         )
             .into_response(),
-        Err(_) => (
+        Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
-            response::<i64>("error", true, None),
+            response::<i64>(
+                "error",
+                true,
+                None,
+                Some(&format!("Failed to duplicate user: {}", e)),
+            ),
         )
             .into_response(),
     }

@@ -1,6 +1,7 @@
 use async_trait::async_trait;
 use axum::http::StatusCode;
 use axum::Json;
+use log::info;
 use serde::{Deserialize, Serialize};
 use sqlx::Row;
 use sqlx::{query::Query, PgPool, Postgres};
@@ -41,6 +42,7 @@ impl<T: CrudModel> CrudService<T> {
             T::table_name(),
             T::id_field()
         );
+        info!("Executing query: {}", &query);
         let row = sqlx::query(&query)
             .bind(id)
             .fetch_one(&self.pool)
@@ -63,6 +65,7 @@ impl<T: CrudModel> CrudService<T> {
                 .join(", "),
             T::id_field()
         );
+        info!("Executing query: {}", &query);
         let query = T::bind_create(sqlx::query(&query), &model);
 
         let row = query
@@ -88,6 +91,7 @@ impl<T: CrudModel> CrudService<T> {
                     .join(", "),
                 T::id_field()
             );
+            info!("Executing query: {}", &query);
             let query = T::bind_create(sqlx::query(&query), &model);
 
             let row = query
@@ -104,6 +108,7 @@ impl<T: CrudModel> CrudService<T> {
 
     pub async fn list(&self) -> Result<Json<Vec<T>>, StatusCode> {
         let query = format!("SELECT {} FROM {}", T::fields().join(", "), T::table_name());
+        info!("Executing query: {}", &query);
 
         let rows = sqlx::query(&query)
             .fetch_all(&self.pool)
@@ -124,6 +129,7 @@ impl<T: CrudModel> CrudService<T> {
             T::table_name(),
             T::id_field()
         );
+        info!("Executing query: {}", &query);
 
         let result = sqlx::query(&query)
             .bind(id)
@@ -150,6 +156,8 @@ impl<T: CrudModel> CrudService<T> {
                 .join(", "),
             T::id_field()
         );
+        info!("Executing query: {}", &query);
+
         let query = T::bind_update(sqlx::query(&query), &model).bind(id);
 
         let result = query
@@ -177,6 +185,7 @@ impl<T: CrudModel> CrudService<T> {
                     .join(", "),
                 T::id_field()
             );
+            info!("Executing query: {}", &query);
             let query = T::bind_update(sqlx::query(&query), &model).bind(id);
 
             let result = query
@@ -199,6 +208,7 @@ impl<T: CrudModel> CrudService<T> {
             T::table_name(),
             T::id_field()
         );
+        info!("Executing query: {}", &query);
 
         let row = sqlx::query(&query)
             .bind(id)
