@@ -48,7 +48,7 @@ def create_initial_users(base_url, num_initial_users):
         else:
             logging.error("------")
             logging.error("Failed to create initial user.")
-            logging.error(f"Response Body: {json.dumps(response_body)}")
+            logging.error(f"Status: {response.status}   |  Response Body: {json.dumps(response_body)}")
             logging.error("------")
             exit()
 

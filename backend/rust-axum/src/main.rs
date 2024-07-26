@@ -1,5 +1,6 @@
 mod apis;
 mod database;
+mod exceptions;
 mod services;
 
 use apis::user::{

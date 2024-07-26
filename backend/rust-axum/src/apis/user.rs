@@ -80,7 +80,7 @@ pub async fn get_user_handler(
                 "error",
                 true,
                 None,
-                Some(&format!("Failed to get user: {}", e)),
+                Some(&format!("Failed to get user -> {}", e)),
             ),
         )
             .into_response(),
@@ -105,7 +105,7 @@ pub async fn create_user_handler(
                 "error",
                 true,
                 None,
-                Some(&format!("Failed to create user: {}", e)),
+                Some(&format!("Failed to create user -> {}", e)),
             ),
         )
             .into_response(),
@@ -130,7 +130,7 @@ pub async fn create_users_handler(
                 "error",
                 true,
                 None,
-                Some(&format!("Failed to create users: {}", e)),
+                Some(&format!("Failed to create users -> {}", e)),
             ),
         )
             .into_response(),
@@ -151,7 +151,7 @@ pub async fn list_users_handler(Extension(pool): Extension<PgPool>) -> impl Into
                 "error",
                 true,
                 None,
-                Some(&format!("Failed to list users: {}", e)),
+                Some(&format!("Failed to list users -> {}", e)),
             ),
         )
             .into_response(),
@@ -171,7 +171,7 @@ pub async fn delete_user_handler(
                 "error",
                 true,
                 None,
-                Some(&format!("Failed to delete user: {}", e)),
+                Some(&format!("Failed to delete user -> {}", e)),
             ),
         )
             .into_response(),
@@ -193,7 +193,7 @@ pub async fn update_user_handler(
                 "error",
                 true,
                 None,
-                Some(&format!("Failed to update user: {}", e)),
+                Some(&format!("Failed to update user -> {}", e)),
             ),
         )
             .into_response(),
@@ -214,7 +214,7 @@ pub async fn update_users_handler(
                 "error",
                 true,
                 None,
-                Some(&format!("Failed to update users: {}", e)),
+                Some(&format!("Failed to update users -> {}", e)),
             ),
         )
             .into_response(),
@@ -238,7 +238,7 @@ pub async fn duplicate_user_handler(
                 "error",
                 true,
                 None,
-                Some(&format!("Failed to duplicate user: {}", e)),
+                Some(&format!("Failed to duplicate user -> {}", e)),
             ),
         )
             .into_response(),

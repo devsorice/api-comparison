@@ -1,8 +1,10 @@
+use crate::exceptions::AppError;
 use async_trait::async_trait;
 use axum::http::StatusCode;
 use axum::Json;
 use log::info;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sqlx::Row;
 use sqlx::{query::Query, PgPool, Postgres};
 use std::marker::PhantomData;
@@ -54,7 +56,7 @@ impl<T: CrudModel> CrudService<T> {
         Ok(Json(model))
     }
 
-    pub async fn create(&self, model: T) -> Result<Json<i64>, StatusCode> {
+    pub async fn create(&self, model: T) -> Result<Json<i64>, AppError> {
         let query = format!(
             "INSERT INTO {} ({}) VALUES ({}) RETURNING {}",
             T::table_name(),
@@ -71,7 +73,7 @@ impl<T: CrudModel> CrudService<T> {
         let row = query
             .fetch_one(&self.pool)
             .await
-            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+            .map_err(AppError::DatabaseError)?;
 
         let id: i64 = row.try_get("id").unwrap_or_default();
         Ok(Json(id))
@@ -201,7 +203,7 @@ impl<T: CrudModel> CrudService<T> {
         Ok(StatusCode::OK)
     }
 
-    pub async fn duplicate(&self, id: i32) -> Result<Json<i64>, StatusCode> {
+    pub async fn duplicate(&self, id: i32) -> Result<Json<i64>, AppError> {
         let query = format!(
             "SELECT {} FROM {} WHERE {} = $1",
             T::fields().join(", "),
@@ -214,10 +216,16 @@ impl<T: CrudModel> CrudService<T> {
             .bind(id)
             .fetch_one(&self.pool)
             .await
-            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+            .map_err(AppError::DatabaseError)?;
 
-        let model: T = serde_json::from_value(row.try_get("json").unwrap())
-            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+        let json_value: Value = row
+            .try_get("json")
+            .map_err(|e| AppError::DatabaseError(e.into()))?;
+
+        let model: T = serde_json::from_value(json_value).map_err(|e| {
+            AppError::DeserializationError(format!("Failed to deserialize JSON: {}", e))
+        })?;
+
         self.create(model).await
     }
 }
