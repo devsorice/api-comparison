@@ -1,5 +1,5 @@
 import { component$ } from '@builder.io/qwik';
-import { useUsersLoader } from '../../routes/users';
+import { useUsersLoader } from '../../routes/dashboard/users';
 import type { User } from '~/interfaces/user';
 
 

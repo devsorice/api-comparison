@@ -11,7 +11,7 @@ export default component$(() => {
             <QwikLogo height={50} width={143} />
           </a>
         </div>
-        <ul>
+        {/* <ul>
           <li>
             <a
               href="https://qwik.dev/docs/components/overview/"
@@ -36,7 +36,7 @@ export default component$(() => {
               Tutorials
             </a>
           </li>
-        </ul>
+        </ul> */}
       </div>
     </header>
   );
