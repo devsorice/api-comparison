@@ -18,7 +18,7 @@ export default component$(() => {
       </button>
       <Sidebar highlight>
         <Sidebar.ItemGroup>
-          <Sidebar.Item>Users</Sidebar.Item>
+          <Sidebar.Item href='/dashboard/users'>Users</Sidebar.Item>
         </Sidebar.ItemGroup>
       </Sidebar>
     </div>
