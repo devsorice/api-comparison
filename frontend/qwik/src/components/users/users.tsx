@@ -1,11 +1,8 @@
 import { component$ } from '@builder.io/qwik';
 import { useUsersLoader } from '../../routes/users';
+import type { User } from '~/interfaces/user';
 
-interface User {
-  id: number;
-  name: string;
-  email: string;
-}
+
 
 export default component$(() => {
   const users = useUsersLoader().value;
