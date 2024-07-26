@@ -6,7 +6,7 @@ use log::info;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::Row;
-use sqlx::{query::Query, PgPool, Postgres};
+use sqlx::{postgres::PgRow, query::Query, PgPool, Postgres};
 use std::marker::PhantomData;
 
 #[async_trait]
@@ -14,6 +14,7 @@ pub trait CrudModel: Serialize + for<'de> Deserialize<'de> + Send + Sync + Unpin
     fn table_name() -> &'static str;
     fn id_field() -> &'static str;
     fn fields() -> &'static [&'static str];
+    fn list_fields() -> &'static [&'static str];
     fn bind_create<'q>(
         query: Query<'q, Postgres, <Postgres as sqlx::database::HasArguments<'q>>::Arguments>,
         model: &'q Self,
@@ -22,6 +23,7 @@ pub trait CrudModel: Serialize + for<'de> Deserialize<'de> + Send + Sync + Unpin
         query: Query<'q, Postgres, <Postgres as sqlx::database::HasArguments<'q>>::Arguments>,
         model: &'q Self,
     ) -> Query<'q, Postgres, <Postgres as sqlx::database::HasArguments<'q>>::Arguments>;
+    fn from_row(row: &PgRow) -> Result<Self, AppError>;
 }
 
 pub struct CrudService<T: CrudModel> {
@@ -108,19 +110,23 @@ impl<T: CrudModel> CrudService<T> {
         Ok(Json(ids))
     }
 
-    pub async fn list(&self) -> Result<Json<Vec<T>>, StatusCode> {
-        let query = format!("SELECT {} FROM {}", T::fields().join(", "), T::table_name());
+    pub async fn list(&self) -> Result<Json<Vec<T>>, AppError> {
+        let query = format!(
+            "SELECT {} FROM {}",
+            T::list_fields().join(", "),
+            T::table_name()
+        );
         info!("Executing query: {}", &query);
 
         let rows = sqlx::query(&query)
             .fetch_all(&self.pool)
             .await
-            .map_err(|_| StatusCode::INTERNAL_SERVER_ERROR)?;
+            .map_err(AppError::DatabaseError)?;
 
         let models: Vec<T> = rows
             .into_iter()
-            .map(|row| serde_json::from_value(row.try_get("json").unwrap()).unwrap())
-            .collect();
+            .map(|row| T::from_row(&row))
+            .collect::<Result<Vec<T>, AppError>>()?;
 
         Ok(Json(models))
     }

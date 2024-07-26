@@ -1,9 +1,10 @@
 use crate::database::crud::{CrudModel, CrudService};
+use crate::exceptions::AppError;
 use async_trait::async_trait;
 use axum::{extract::Json, extract::Path, http::StatusCode, response::IntoResponse, Extension};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use sqlx::{query::Query, PgPool, Postgres};
+use sqlx::{postgres::PgRow, query::Query, PgPool, Postgres, Row};
 
 #[derive(Serialize, Deserialize)]
 pub struct User {
@@ -28,6 +29,10 @@ impl CrudModel for User {
         &["name", "email"]
     }
 
+    fn list_fields() -> &'static [&'static str] {
+        &["id", "name", "email"]
+    }
+
     fn bind_create<'q>(
         mut query: Query<'q, Postgres, <Postgres as sqlx::database::HasArguments<'q>>::Arguments>,
         model: &'q Self,
@@ -42,6 +47,18 @@ impl CrudModel for User {
     ) -> Query<'q, Postgres, <Postgres as sqlx::database::HasArguments<'q>>::Arguments> {
         query = query.bind(&model.name).bind(&model.email);
         query
+    }
+    fn from_row(row: &PgRow) -> Result<Self, AppError> {
+        let id: Option<i32> = row
+            .try_get("id")
+            .map_err(|e| AppError::DeserializationError(e.to_string()))?;
+        let name: Option<String> = row
+            .try_get("name")
+            .map_err(|e| AppError::DeserializationError(e.to_string()))?;
+        let email: String = row
+            .try_get("email")
+            .map_err(|e| AppError::DeserializationError(e.to_string()))?;
+        Ok(User { id, name, email })
     }
 }
 
