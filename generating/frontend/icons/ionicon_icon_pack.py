@@ -1,0 +1,24 @@
+from generating.frontend.icons.icon import Icon
+
+
+class IoniconPack:
+    @staticmethod
+    def translate_icon(icon):
+        icon_classes = {
+            Icon.HOME: 'ion-md-home',
+            Icon.USER: 'ion-md-person',
+            Icon.SETTINGS: 'ion-md-settings',
+            Icon.NOTIFICATIONS: 'ion-md-notifications',
+            Icon.SEARCH: 'ion-md-search',
+            Icon.MAIL: 'ion-md-mail',
+            Icon.CHAT: 'ion-md-chatboxes',
+            Icon.HELP: 'ion-md-help-circle',
+            Icon.LOGOUT: 'ion-md-log-out',
+            Icon.DASHBOARD: 'ion-md-speedometer',
+            Icon.PROFILE: 'ion-md-contact',
+            Icon.CALENDAR: 'ion-md-calendar',
+            Icon.UPLOAD: 'ion-md-cloud-upload',
+            Icon.DOWNLOAD: 'ion-md-cloud-download'
+            # Add more mappings as needed
+        }
+        return icon_classes.get(icon, '')
