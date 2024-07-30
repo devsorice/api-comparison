@@ -1,7 +1,8 @@
 from generating.frontend.icons.icon import Icon
+from generating.frontend.icons.icon_pack import IconPack
 
 
-class IoniconPack:
+class IoniconPack(IconPack):
     @staticmethod
     def translate_icon(icon):
         icon_classes = {

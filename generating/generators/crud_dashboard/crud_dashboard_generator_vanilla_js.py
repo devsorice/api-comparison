@@ -7,17 +7,18 @@
 from typing import List
 from generating.frontend.html_element import HtmlElement
 from generating.frontend.sidebar_element import SidebarHtmlElement
+from generating.generators.app import App
 from generating.generators.crud_dashboard.crud_dashboard_generator import CrudDashboardFrontendGenerator
 from generating.model.model import Model
 
 
 class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
-    def generate(self, models:List[Model]=[]):
-        sidebar_html_element = self.generate_sidebar(models)
+    def generate(self, app:App):
+        sidebar_html_element = self.generate_sidebar(app)
+        topbar_html_element  = self.generate_topbar()
 
 
-
-    def generate_sidebar(self, models: List[Model] = []):
+    def generate_sidebar(self, app:App):
         sidebar_items = [
             {'icon': 'fa-home', 'title': 'Home', 'link': '/home'},
             {'title': 'Profile', 'link': '/profile'},  # No icon here

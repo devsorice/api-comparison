@@ -6,6 +6,7 @@ from generating.backend.frameworks import BackendFramewoks
 from generating.frontend.frameworks import FrontendFrameworks
 from generating.frontend.icons.fontawesome_icon_pack import FontAwesomeIconPack
 from generating.frontend.icons.icon import Icon
+from generating.generators.app import App
 from generating.generators.crud_dashboard.crud_dashboard import CrudDashboard
 from generating.model.fields import EmailField, PrimaryKeyField, ShortTextField
 from generating.model.model import Model
@@ -38,8 +39,8 @@ class TodolistEntryModel(Model):
   }
 
 
-CrudDashboard()
-CrudDashboard.generate_code(
+CrudDashboard(
+      name="Todo Dashboard",
       roles=[
           AdminRole(), #### Can do Everything by default
           UserRole()   ###  Can't do Anything by default
@@ -49,3 +50,4 @@ CrudDashboard.generate_code(
       backend=BackendFramewoks.RUST_AXUM,
       database=Databases.POSTGRES
 )
+CrudDashboard.generate_code()

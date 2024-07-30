@@ -1,4 +1,7 @@
 
+from generating.generators.app import App
+
+
 class Generator:
-    def generate(self, models:List[Model]=[]):
+    def generate(self, app:App):
         pass

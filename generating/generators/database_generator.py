@@ -1,6 +1,4 @@
-
-from typing import Generator
-
+from generating.generators.generator import Generator
 
 class DatabaseGenerator(Generator):
     pass

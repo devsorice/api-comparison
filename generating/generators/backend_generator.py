@@ -1,5 +1,4 @@
-from typing import Generator
-
+from generating.generators.generator import Generator
 
 class BackendGenerator(Generator):
     pass
