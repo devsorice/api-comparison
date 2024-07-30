@@ -3,7 +3,7 @@ from typing import List
 from generating.auth.role import Role
 from generating.backend.databases import Databases
 from generating.backend.frameworks import BackendFramewoks
-from generating.frontend.frameworks import FrontendFrameworks
+from generating.frontend.frameworks.frameworks import FrontendFrameworks
 from generating.generators.app import App
 from generating.generators.crud_dashboard.crud_dashboard_generator_vanilla_js import CrudDahboardVanillaJSGenerator
 from generating.model.model import Model

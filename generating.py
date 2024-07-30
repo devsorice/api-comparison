@@ -3,10 +3,9 @@ from generating.auth.admin import AdminRole
 from generating.auth.user import UserRole
 from generating.backend.databases import Databases
 from generating.backend.frameworks import BackendFramewoks
-from generating.frontend.frameworks import FrontendFrameworks
+from generating.frontend.frameworks.frameworks import FrontendFrameworks
 from generating.frontend.icons.fontawesome_icon_pack import FontAwesomeIconPack
 from generating.frontend.icons.icon import Icon
-from generating.generators.app import App
 from generating.generators.crud_dashboard.crud_dashboard import CrudDashboard
 from generating.model.fields import EmailField, PrimaryKeyField, ShortTextField
 from generating.model.model import Model

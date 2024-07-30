@@ -1,8 +1,9 @@
 import os
+from typing import Callable
 
 
 class GeneratedFile:
-  def __init__(self, path:str, read_function:function):
+  def __init__(self, path:str, read_function:Callable):
     self.path = path
     self.read_function = read_function
 
