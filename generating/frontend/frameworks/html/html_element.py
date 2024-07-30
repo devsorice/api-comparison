@@ -1,4 +1,8 @@
 ##THIS IS TO CREATE HTML
+from typing import List
+import re
+
+
 class HtmlElement:
     fields = ['tag', 'attributes', 'content', 'closing', 'before', 'after', 'description', 'icon', 'title']
     default_values = {'closing': 'default', 'attributes': {}, 'content': '', 'before': '', 'after': '', 'description': '', 'icon': '', 'title': '', 'class': ''}
@@ -44,7 +48,8 @@ class HtmlElement:
             tag_open += self.tag
         if hasattr(self, 'attributes') and isinstance(self.attributes, dict):
             for key, item in self.attributes.items():
-                tag_open += f' {key}="{item}"'
+                escaped_item = re.sub(r'[^a-zA-Z0-9]', lambda x: f'&#{ord(x.group())};', item)
+                tag_open += f' {key}="{escaped_item}"'
         if hasattr(self, 'closing') and self.closing == 'self':
             tag_open += '/'
         tag_open += '>'
@@ -72,12 +77,24 @@ class HtmlElement:
 
         return string
 
+    def add_children(self, el):
+        if not hasattr(self, 'content'):
+            self.content = []
+        elif isinstance(self.content, str) or isinstance(self.content, HtmlElement):
+            self.content = [self.content]
+        elif not isinstance(self.content, list):
+            self.content = []
+
+        if isinstance(el, str) or isinstance(el, HtmlElement):
+            self.content.append(el)
+
+
     def get_content(self):
         if hasattr(self, 'content'):
             if isinstance(self.content, str):
                 return self.trim(self.content)
             elif isinstance(self.content, HtmlElement):
                 return self.content.get_html()
-            elif isinstance(self.content, List[HtmlElement]):
+            elif isinstance(self.content, list):
                 return ''.join([elem.get_html() for elem in self.content])
         return ''

@@ -1,15 +1,11 @@
-from typing import Dict, List
+from typing import List
 
 from generating.auth.role import Role
 from generating.backend.databases import Databases
 from generating.backend.frameworks import BackendFramewoks
 from generating.frontend.frameworks import FrontendFrameworks
 from generating.generators.app import App
-from generating.generators.backend_generator import BackendGenerator
 from generating.generators.crud_dashboard.crud_dashboard_generator_vanilla_js import CrudDahboardVanillaJSGenerator
-from generating.generators.database_generator import DatabaseGenerator
-from generating.generators.file import GeneratedFile
-from generating.generators.frontend_generator import FrontendGenerator
 from generating.model.model import Model
 
 
@@ -29,15 +25,13 @@ class CrudDashboard(App):
                    database:Databases=None
                    ):
           super.__init__(self, name)
-          self.files:List[GeneratedFile] = []
           self.roles = roles
           self.models = models
           self.frontend = frontend
           self.backend = backend
           self.database = database
 
-      def add_file(self, file:GeneratedFile):
-          self.files.append(file)
+
 
       def generate_code(self):
           if self.frontend is not None:
@@ -54,3 +48,8 @@ class CrudDashboard(App):
             database_generator = self.database_generators.get(self.database, None)
             if database_generator is not None:
                 database_generator.generate(self)
+
+
+      def save(self, path=''):
+          for file in self.files:
+              file.save(path)
