@@ -51,3 +51,4 @@ CrudDashboard(
       database=Databases.POSTGRES
 )
 CrudDashboard.generate_code()
+CrudDashboard.save('generated_code')
