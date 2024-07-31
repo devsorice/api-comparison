@@ -1,3 +1,46 @@
-h1 {
-  color: blue;
+:root {
+  --sidebar-width: 240px;
+  /* Declare the variable at the root level */
+}
+
+main {
+  margin-left: var(--sidebar-width);
+  /* Use the variable for margin-left */
+}
+
+.page-sidebar {
+  background-color: #222a30;
+  bottom: 0;
+  left: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: fixed;
+  top: 0;
+  transition: height 0.3s ease-out;
+  width: var(--sidebar-width);
+  /* Use the variable for width */
+  z-index: 2;
+}
+
+.page-sidebar>nav>ul>li>a {
+  font-size: 16px;
+  transition: all .15s ease-out;
+}
+
+.page-sidebar>nav>ul>li>a:hover {
+  background-color: rgba(0, 0, 0, .1);
+  border-left: 2px solid #39f;
+  color: #fff;
+  padding-left: 30px;
+}
+
+
+.page-sidebar>nav>ul>li.parent>a:after {
+  background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='14' height='14' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='none' stroke='rgba(255, 255, 255, 0.7)' stroke-width='1.1' d='M10 1 4 7l6 6'/%3E%3C/svg%3E");
+  background-position: 50% 50%;
+  background-repeat: no-repeat;
+  content: "";
+  height: 1.5em;
+  margin-left: auto;
+  width: 1.5em;
 }

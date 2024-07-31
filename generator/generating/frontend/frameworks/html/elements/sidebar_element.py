@@ -35,7 +35,9 @@ class SidebarHtmlElement(HtmlElement):
         _open = element.get('open', False)
         _has_children = 'children' in element and element['children']
         _parent_class = 'parent'
-        _class_name   = _parent_class
+        _class_name = ''
+        if _has_children:
+          _class_name   = _parent_class
         if _open:
            _class_name += ' open'
 
@@ -106,8 +108,10 @@ class UiKitSidebarElement(SidebarHtmlElement):
 
         _open = element.get('open', False)
         _has_children = 'children' in element and element['children']
-        _parent_class = 'uk-parent'
-        _class_name   = _parent_class
+        _parent_class = 'uk-parent parent'
+        _class_name = ''
+        if _has_children:
+          _class_name   = _parent_class
         if _open:
            _class_name += ' uk-open'
 
