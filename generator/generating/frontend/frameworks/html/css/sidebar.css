@@ -44,3 +44,7 @@ main {
   margin-left: auto;
   width: 1.5em;
 }
+
+[hidden] {
+  display: none !important;
+}

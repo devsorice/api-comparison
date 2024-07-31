@@ -53,6 +53,8 @@ class SidebarHtmlElement(HtmlElement):
 
         if _has_children:
            ul = HtmlElement('ul')
+           if not _open:
+              ul.attr('hidden',True)
            for child in children:
               title = child.get('title', '')
               href  = child.get('href', None)
@@ -127,6 +129,8 @@ class UiKitSidebarElement(SidebarHtmlElement):
 
         if _has_children:
            ul = HtmlElement(tag='ul', _class='uk-nav-sub')
+           if not _open:
+              ul.attr('hidden',True)
            for child in children:
               title = child.get('title', '')
               href  = child.get('href', None)
