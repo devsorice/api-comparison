@@ -7,6 +7,7 @@ class HtmlElement:
     fields = ['tag', 'attributes', 'content', 'closing', 'before', 'after', 'description', 'icon', 'title']
     default_values = {'closing': 'default', 'attributes': {}, 'content': '', 'before': '', 'after': '', 'description': '', 'icon': '', 'title': '', 'class': ''}
 
+
     def __init__(self, **params):
         if params is None:
             params = {}

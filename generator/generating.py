@@ -45,7 +45,7 @@ generator = CrudDashboard(
           UserRole()   ###  Can't do Anything by default
       ],
       models=[UserModel(), TodolistEntryModel()],
-      frontend=FrontendFrameworks.VANILLA_JS_AJAX  + FontAwesomeIconPack,
+      frontend=FrontendFrameworks.VANILLA_JS_AJAX  + FontAwesomeIconPack + CssDownload('https://cdn.jsdelivr.net/npm/uikit@3.21.8/dist/css/uikit.min.css'),
       backend=BackendFramewoks.RUST_AXUM,
       database=Databases.POSTGRES
 )

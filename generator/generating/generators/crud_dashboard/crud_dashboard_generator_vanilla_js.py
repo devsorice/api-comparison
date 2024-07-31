@@ -4,17 +4,17 @@
 #####FRONTEND REPOSITORY
 #####BACKEND  REPOSITORY  + SWAGGER DOCUMENTATION
 #####SQL MIGRATION OR MONGO MIGRATIONS
-from generating.frontend.frameworks.html.html_element import HtmlElement
 from generating.frontend.frameworks.html.pages.create_page import CreatePage
 from generating.frontend.frameworks.html.pages.dashboard_page import DashboardPage
 from generating.frontend.frameworks.html.pages.list_page import ListPage
 from generating.frontend.frameworks.html.pages.page import HtmlPage
 from generating.frontend.frameworks.html.pages.show_page import ShowPage
 from generating.frontend.frameworks.html.pages.update_page import UpdatePage
-from generating.frontend.frameworks.html.sidebar_element import SidebarHtmlElement
-from generating.frontend.frameworks.html.topbar_element import TopbarHtmlElement
 from generating.generators.crud_dashboard.crud_dashboard_generator import CrudDashboardFrontendGenerator
 from generating.generators.file import GeneratedFile
+from generator.generating.frontend.frameworks.html.elements.html_element import HtmlElement
+from generator.generating.frontend.frameworks.html.elements.sidebar_element import SidebarHtmlElement
+from generator.generating.frontend.frameworks.html.elements.topbar_element import TopbarHtmlElement
 
 
 class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):

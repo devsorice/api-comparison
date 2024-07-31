@@ -1,16 +1,23 @@
-from generating.frontend.frameworks.html.html_element import HtmlElement
 from generating.frontend.locales.languages import Language
 from generating.frontend.settings.charset import Charset
+from generator.generating.frontend.frameworks.html.elements.favicon import Favicon
+from generator.generating.frontend.frameworks.html.elements.html_element import HtmlElement
 
 
 class HtmlPage:
+    ### ISPIRAZIONE DA
+    ### https://github.com/devsorice/redazione/blob/master/admin/ui/templates/app.tpl
+    ### TO EXPAND
     def __init__(self, title:str='',
                        language:Language=Language.ENGLISH,
                        charset:Charset=Charset.UTF_8,
                        h1:str|None=None,
                        main_content:HtmlElement|None=None,
+                       favicon:Favicon|None=None
+
 
                 ):
+
         self.title = title
         self.h1    = title
         if h1 is None:
@@ -24,6 +31,10 @@ class HtmlPage:
         })
 
         ####HEAD#############################
+        self.favicon = favicon
+        if self.favicon is None:
+            favicon = Favicon()
+
         self.head_element = HtmlElement(tag='head')
         self.head_element.add_children(
             HtmlElement(tag='meta', attributes={
@@ -43,6 +54,13 @@ class HtmlPage:
         self.head_element.add_children(
             HtmlElement(tag='title', content=title)
         )
+        self.favicon = favicon
+        if self.favicon is None:
+            favicon = Favicon()
+
+        for favicon_tag in self.favicon.get_elements():
+          self.head_element.add_children(favicon_tag)
+
         self.html_element.add_children(self.head_element)
         #############################################
 
