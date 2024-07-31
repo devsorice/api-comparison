@@ -9,6 +9,7 @@ from generating.frontend.icons.icon import Icon
 from generating.generators.crud_dashboard.crud_dashboard import CrudDashboard
 from generating.model.fields import EmailField, PrimaryKeyField, ShortTextField
 from generating.model.model import Model
+from generator.generating.frontend.frameworks.libraries import FrontendLibraries
 
 class UserModel(Model):
   icon           = Icon.USER
@@ -40,12 +41,13 @@ class TodolistEntryModel(Model):
 
 generator = CrudDashboard(
       name="Todo Dashboard",
+      short_name="Crud",
       roles=[
           AdminRole(), #### Can do Everything by default
           UserRole()   ###  Can't do Anything by default
       ],
       models=[UserModel(), TodolistEntryModel()],
-      frontend=FrontendFrameworks.VANILLA_JS_AJAX  + FontAwesomeIconPack + CssDownload('https://cdn.jsdelivr.net/npm/uikit@3.21.8/dist/css/uikit.min.css'),
+      frontend=FrontendFrameworks.VANILLA_JS_AJAX  + FontAwesomeIconPack + FrontendLibraries.UI_KIT,
       backend=BackendFramewoks.RUST_AXUM,
       database=Databases.POSTGRES
 )

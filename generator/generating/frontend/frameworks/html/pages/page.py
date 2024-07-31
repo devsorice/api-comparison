@@ -1,21 +1,32 @@
+from typing import List
 from generating.frontend.locales.languages import Language
 from generating.frontend.settings.charset import Charset
 from generator.generating.frontend.frameworks.html.elements.favicon import Favicon
 from generator.generating.frontend.frameworks.html.elements.html_element import HtmlElement
 
-
-class HtmlPage:
-    ### ISPIRAZIONE DA
-    ### https://github.com/devsorice/redazione/blob/master/admin/ui/templates/app.tpl
-    ### TO EXPAND
+class Page:
     def __init__(self, title:str='',
                        language:Language=Language.ENGLISH,
                        charset:Charset=Charset.UTF_8,
                        h1:str|None=None,
                        main_content:HtmlElement|None=None,
-                       favicon:Favicon|None=None
+                       favicon:Favicon|None=None,
+                       css:List[str]|None=None,
+                       hide_header:bool=False,
+                       hide_footer:bool=False
+                ):
+        pass
 
-
+class HtmlPage(Page):
+    def __init__(self, title:str='',
+                       language:Language=Language.ENGLISH,
+                       charset:Charset=Charset.UTF_8,
+                       h1:str|None=None,
+                       main_content:HtmlElement|None=None,
+                       favicon:Favicon|None=None,
+                       css:List[str]|None=None,
+                       hide_header:bool=False,
+                       hide_footer:bool=False
                 ):
 
         self.title = title
@@ -61,6 +72,11 @@ class HtmlPage:
         for favicon_tag in self.favicon.get_elements():
           self.head_element.add_children(favicon_tag)
 
+
+        if isinstance(css, list):
+            for css_path in css:
+                self.add_css(css_path)
+
         self.html_element.add_children(self.head_element)
         #############################################
 
@@ -75,14 +91,21 @@ class HtmlPage:
             self.main_element.add_children(main_content)
         self.footer_element = HtmlElement(tag='footer')
 
-        self.body_element.add_children(self.header_element)
+        if not hide_header:
+          self.body_element.add_children(self.header_element)
         self.body_element.add_children(self.main_element)
-        self.body_element.add_children(self.footer_element)
+        if not hide_footer:
+          self.body_element.add_children(self.footer_element)
         self.html_element.add_children(self.body_element)
         #########################################
 
 
 
+    def add_css(self, path):
+        self.head_element.add_children(HtmlElement(tag='link', attributes={
+                  'rel':'stylesheet',
+                  'href':path
+                }))
 
     def build(self):
         html =  '<!DOCTYPE html>'

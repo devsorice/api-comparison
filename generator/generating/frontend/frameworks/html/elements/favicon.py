@@ -102,9 +102,10 @@ class Favicon:
           }))
     self.files.add('site.webmanifest', self.generate_webmanifest)
 
-  def get_elements(self):
+  def get_elements(self)->List[HtmlElement]:
      return self.elements
-  def get_files(self):
+
+  def get_files(self) ->List[GeneratedFile]:
      return self.files
 
   def generate_webmanifest(self):

@@ -7,6 +7,12 @@ class GeneratedFile:
     self.path = path
     self.read_function = read_function
 
+  def get_path(self):
+    return self.path
+
+  def get_read_function(self):
+    return self.read_function
+
   def save(self, basePath=''):
     file_path = basePath+'/'+self.path
     content=self.read_function()

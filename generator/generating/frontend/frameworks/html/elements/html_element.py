@@ -5,7 +5,7 @@ import re
 
 class HtmlElement:
     fields = ['tag', 'attributes', 'content', 'closing', 'before', 'after', 'description', 'icon', 'title']
-    default_values = {'closing': 'default', 'attributes': {}, 'content': '', 'before': '', 'after': '', 'description': '', 'icon': '', 'title': '', 'class': ''}
+    default_values = {'closing': 'default', 'attributes': {}, 'content': '', 'before': '', 'after': '', 'description': '', 'icon': '', 'title': '', '_class': ''}
 
 
     def __init__(self, **params):
@@ -13,11 +13,17 @@ class HtmlElement:
             params = {}
         self.__dict__.update(HtmlElement.default_values)
         self.__dict__.update(params)
+        class_name = params.get('_class', None)
+        if class_name and self.attr_get('class')=='':
+            self.attr('class', class_name)
 
     def attr(self, key, value):
         if not hasattr(self, 'attributes'):
             self.attributes = {}
-        self.attributes[key] = str(value)
+        if isinstance(value, bool) and value:
+          self.attributes[key] = True
+        else:
+          self.attributes[key] = str(value)
 
     def attr_get(self, key):
         if not hasattr(self, 'attributes') or key not in self.attributes:
@@ -52,6 +58,8 @@ class HtmlElement:
                 if isinstance(key, str) and key!='' and isinstance(item, str) and item!='':
                   escaped_item = re.sub(r'[^a-zA-Z0-9]', lambda x: f'&#{ord(x.group())};', item)
                   tag_open += f' {key}="{escaped_item}"'
+                elif isinstance(key, str) and key!='' and isinstance(item, bool) and item:
+                  tag_open += f' {key}'
         if hasattr(self, 'closing') and self.closing == 'self':
             tag_open += '/'
         tag_open += '>'

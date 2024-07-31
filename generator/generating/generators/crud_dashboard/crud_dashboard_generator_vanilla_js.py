@@ -12,6 +12,7 @@ from generating.frontend.frameworks.html.pages.show_page import ShowPage
 from generating.frontend.frameworks.html.pages.update_page import UpdatePage
 from generating.generators.crud_dashboard.crud_dashboard_generator import CrudDashboardFrontendGenerator
 from generating.generators.file import GeneratedFile
+from generator.generating.frontend.frameworks.html.elements.favicon import Favicon
 from generator.generating.frontend.frameworks.html.elements.html_element import HtmlElement
 from generator.generating.frontend.frameworks.html.elements.sidebar_element import SidebarHtmlElement
 from generator.generating.frontend.frameworks.html.elements.topbar_element import TopbarHtmlElement
@@ -24,21 +25,28 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
                              )
 
     def add_page_to_files(self, app, path:str, page:HtmlPage):
-        file = self.page_to_file(path, page)
+        file = self.page_to_file('frontend/'+path, page)
         app.add_file(file)
 
+
     def generate(self, app):
+        favicon              = Favicon(app_short_name=app.short_name, app_long_name=app.name)
+        for file in favicon.get_files():
+            self.add_page_to_files(app, 'frontend/'+file.get_path(), file.get_read_function())
+
         sidebar_html_element = self.generate_sidebar(app)
         topbar_html_element  = self.generate_topbar(app)
 
         dashboard_page      = self.generate_dashboard_page(app)
+        for framework in app.get_active_frontend_libraries():
+           framework.process_page(dashboard_page)
         self.add_page_to_files(app, 'dashboard.html', dashboard_page)
 
         for model in app.models:
-            create_page    =  CreatePage(f'Crea {model.title_singular}')
-            list_page      =  ListPage(f'Lista {model.title_singular}')
-            show_page      =  ShowPage(f'Mostra {model.title_singular}')
-            update_page    =  UpdatePage(f'Aggiorna {model.title_singular}')
+            create_page    =  CreatePage(f'Crea {model.title_singular}', favicon=favicon)
+            list_page      =  ListPage(f'Lista {model.title_singular}', favicon=favicon)
+            show_page      =  ShowPage(f'Mostra {model.title_singular}', favicon=favicon)
+            update_page    =  UpdatePage(f'Aggiorna {model.title_singular}', favicon=favicon)
 
             create_page.header_element.add_children(topbar_html_element)
             list_page.header_element.add_children(topbar_html_element)
@@ -51,6 +59,12 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
             update_page.body_element.add_children(sidebar_html_element)
 
 
+            for framework in app.get_active_frontend_libraries():
+                framework.process_page(create_page)
+                framework.process_page(list_page)
+                framework.process_page(show_page)
+                framework.process_page(update_page)
+
             self.add_page_to_files(app, f'{model.slug_singular}/create.html', create_page)
             self.add_page_to_files(app, f'{model.slug_singular}/list.html', list_page)
             self.add_page_to_files(app, f'{model.slug_singular}/show.html', show_page)
@@ -62,12 +76,34 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
 
     def generate_sidebar(self, app):
         sidebar_items = [
-            {'icon': 'fa-home', 'title': 'Home', 'link': '/home'},
-            {'title': 'Profile', 'link': '/profile'},  # No icon here
-            HtmlElement(tag='div', content='Custom HTML Element', attributes={'class': 'custom-element'})
+            {'icon': 'fa-home', 'title': 'Home', 'href': '/home'},
+            {'title': 'Profile', 'href': '/profile'},  # No icon here
+            HtmlElement(tag='div', content='Custom HTML Element', attributes={'class': 'custom-element'}),
+            {'title':'test children', 'icon':'fa-file-word', 'open':True,
+             'children':[
+                  {
+                      "title" : "Utenti",
+                      "href" : "/users/list"
+                  },
+                  {
+                      "title" : "Aggiungi Utente",
+                      "href" : "/users/add"
+                  }
+             ] }
         ]
+        framework_sidebar = None
+        for framework in app.get_active_frontend_libraries():
+            created_sidebar = framework.generate_sidebar(attributes={'class': 'sidebar'}, elements=sidebar_items)
+            if created_sidebar is not None:
+                framework_sidebar = created_sidebar
+
+        sidebar = framework_sidebar
         ####SHOULD LOOP THE MODELS
-        sidebar = SidebarHtmlElement(attributes={'class': 'sidebar'}, elements=sidebar_items)
+        if sidebar is None:
+          sidebar = SidebarHtmlElement(attributes={'class': 'sidebar'}, elements=sidebar_items)
+
+        sidebar.setup_sidebar()
+
         return sidebar
 
     def generate_topbar(self, app):
@@ -78,5 +114,6 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
         return topbar
 
     def generate_dashboard_page(self, app):
-      dashboard_page = DashboardPage('dashboard')
+      favicon        = Favicon(app_short_name=app.short_name, app_long_name=app.name)
+      dashboard_page = DashboardPage('dashboard', favicon=favicon)
       return dashboard_page
