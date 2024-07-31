@@ -89,7 +89,7 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
             {'icon': 'fa-home', 'title': 'Home', 'href': '/home'},
             {'title': 'Profile', 'href': '/profile'},  # No icon here
             HtmlElement(tag='div', content='Custom HTML Element', attributes={'class': 'custom-element'}),
-            {'title':'test children', 'icon':'fa-file-word', 'open':True,
+            {'title':'test children', 'icon':'fa-file-word', 'open':False,
              'children':[
                   {
                       "title" : "Utenti",
