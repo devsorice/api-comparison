@@ -7,8 +7,8 @@ from generating.frontend.frameworks.frameworks import FrontendFrameworks
 from generating.generators.app import App
 from generating.generators.crud_dashboard.crud_dashboard_generator_vanilla_js import CrudDahboardVanillaJSGenerator
 from generating.model.model import Model
-from generator.generating.frontend.frameworks.html.libraries.uikit import Uikit
-from generator.generating.frontend.frameworks.libraries import FrontendLibraries
+from generating.frontend.frameworks.html.libraries.uikit import Uikit
+from generating.frontend.frameworks.libraries import FrontendLibraries
 
 
 class CrudDashboard(App):

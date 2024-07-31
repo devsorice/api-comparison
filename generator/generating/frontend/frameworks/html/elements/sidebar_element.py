@@ -1,10 +1,10 @@
 
 
-from generator.generating.frontend.frameworks.html.elements.html_element import HtmlElement
+from generating.frontend.frameworks.html.elements.html_element import HtmlElement
 
 
 class SidebarHtmlElement(HtmlElement):
-    def __init__(self, elements=None, **params):
+    def __init__(self, elements, **params):
         super().__init__(tag='aside', **params)
         self.elements = elements if elements is not None else []
 
@@ -79,8 +79,8 @@ class SidebarHtmlElement(HtmlElement):
 
 
 class UiKitSidebarElement(SidebarHtmlElement):
-    def __init__(self, elements=None, **params):
-        super().__init__(elements, params)
+    def __init__(self, elements, **params):
+        super().__init__(elements, **params)
         self.attr('class', 'uk-light uk-visible@m page-sidebar')
         self.nav_ul.attr('class', 'uk-nav uk-nav-default uk-nav-parent-icon')
         self.nav_ul.attr('data-uk-nav', True)

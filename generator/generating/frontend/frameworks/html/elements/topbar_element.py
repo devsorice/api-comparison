@@ -1,4 +1,4 @@
-from generating.frontend.frameworks.html.html_element import HtmlElement
+from generating.frontend.frameworks.html.elements.html_element import HtmlElement
 
 
 class TopbarHtmlElement(HtmlElement):

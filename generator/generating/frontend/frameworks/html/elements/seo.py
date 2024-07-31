@@ -1,8 +1,8 @@
 import json
 from typing import List
-from generator.generating.frontend.frameworks.html.elements.html_element import HtmlElement
-from generator.generating.frontend.frameworks.html.elements.utils import meta
-from generator.generating.generators.file import GeneratedFile
+from generating.frontend.frameworks.html.elements.html_element import HtmlElement
+from generating.frontend.frameworks.html.elements.utils import meta
+from generating.generators.file import GeneratedFile
 
 ##https://next.realfavicongenerator.net/
 class Seo:

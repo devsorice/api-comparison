@@ -1,4 +1,4 @@
-from generator.generating.frontend.frameworks.html.pages.page import Page
+from generating.frontend.frameworks.html.pages.page import Page
 
 
 class FrontendLibrary:

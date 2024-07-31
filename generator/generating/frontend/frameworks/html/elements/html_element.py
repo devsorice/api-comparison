@@ -4,14 +4,13 @@ import re
 
 
 class HtmlElement:
-    fields = ['tag', 'attributes', 'content', 'closing', 'before', 'after', 'description', 'icon', 'title']
-    default_values = {'closing': 'default', 'attributes': {}, 'content': '', 'before': '', 'after': '', 'description': '', 'icon': '', 'title': '', '_class': ''}
-
-
     def __init__(self, **params):
+        self.fields = ['tag', 'attributes', 'content', 'closing', 'before', 'after', 'description', 'icon', 'title']
+        self.default_values = {'closing': 'default', 'attributes': {}, 'content': '', 'before': '', 'after': '', 'description': '', 'icon': '', 'title': '', '_class': ''}
+
         if params is None:
             params = {}
-        self.__dict__.update(HtmlElement.default_values)
+        self.__dict__.update(self.default_values)
         self.__dict__.update(params)
         class_name = params.get('_class', None)
         if class_name and self.attr_get('class')=='':

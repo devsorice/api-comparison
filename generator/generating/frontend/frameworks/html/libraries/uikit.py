@@ -1,6 +1,6 @@
-from generator.generating.frontend.frameworks.html.elements.sidebar_element import UiKitSidebarElement
-from generator.generating.frontend.frameworks.html.libraries.frontend_library import FrontendLibrary
-from generator.generating.frontend.frameworks.html.pages.page import HtmlPage
+from generating.frontend.frameworks.html.elements.sidebar_element import UiKitSidebarElement
+from generating.frontend.frameworks.html.libraries.frontend_library import FrontendLibrary
+from generating.frontend.frameworks.html.pages.page import HtmlPage
 
 
 class Uikit(FrontendLibrary):
@@ -11,5 +11,5 @@ class Uikit(FrontendLibrary):
     page.add_css('https://use.fontawesome.com/releases/v5.6.1/css/all.css')
 
 
-  def generate_sidebar(elements, **params):
+  def generate_sidebar(self, elements, **params):
     return UiKitSidebarElement(elements, **params)

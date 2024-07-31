@@ -9,7 +9,7 @@ from generating.frontend.icons.icon import Icon
 from generating.generators.crud_dashboard.crud_dashboard import CrudDashboard
 from generating.model.fields import EmailField, PrimaryKeyField, ShortTextField
 from generating.model.model import Model
-from generator.generating.frontend.frameworks.libraries import FrontendLibraries
+from generating.frontend.frameworks.libraries import FrontendLibraries
 
 class UserModel(Model):
   icon           = Icon.USER

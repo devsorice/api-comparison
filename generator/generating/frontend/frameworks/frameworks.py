@@ -1,7 +1,7 @@
 
 from enum import Enum, auto
 from generating.frontend.icons.icon_pack import IconPack
-from generator.generating.frontend.frameworks.libraries import FrontendLibraries
+from generating.frontend.frameworks.libraries import FrontendLibraries
 
 
 class FrontendFrameworks(Enum):
@@ -18,14 +18,14 @@ class FrontendFrameworks(Enum):
 
     def __add__(self, el):
         if isinstance(el, IconPack):
-            FrontendFrameworks._icon_packs[self] = el
+            FrontendFrameworks._icon_packs.value[self] = el
         if isinstance(el, FrontendLibraries):
-            FrontendFrameworks._libraries[self] = FrontendFrameworks._libraries.get(self, [])
-            FrontendFrameworks._libraries[self].append(el)
+            FrontendFrameworks._libraries.value[self] = FrontendFrameworks._libraries.value.get(self, [])
+            FrontendFrameworks._libraries.value[self].append(el)
         return self
 
     def getIconPack(self):
-        return FrontendFrameworks._icon_packs.get(self, None)
+        return FrontendFrameworks._icon_packs.value.get(self, None)
 
     def getLibraries(self):
-        return FrontendFrameworks._libraries.get(self, None)
+        return FrontendFrameworks._libraries.value.get(self, None)

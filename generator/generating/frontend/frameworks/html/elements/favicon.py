@@ -1,8 +1,8 @@
 import json
 from typing import List
-from generator.generating.frontend.frameworks.html.elements.html_element import HtmlElement
-from generator.generating.frontend.frameworks.html.elements.utils import meta
-from generator.generating.generators.file import GeneratedFile
+from generating.frontend.frameworks.html.elements.html_element import HtmlElement
+from generating.frontend.frameworks.html.elements.utils import meta
+from generating.generators.file import GeneratedFile
 
 ##https://next.realfavicongenerator.net/
 class Favicon:
@@ -100,7 +100,7 @@ class Favicon:
               'rel':'manifest',
               'href':'/site.webmanifest'
           }))
-    self.files.add('site.webmanifest', self.generate_webmanifest)
+    self.files.append(GeneratedFile('site.webmanifest', self.generate_webmanifest))
 
   def get_elements(self)->List[HtmlElement]:
      return self.elements

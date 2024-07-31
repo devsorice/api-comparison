@@ -12,10 +12,10 @@ from generating.frontend.frameworks.html.pages.show_page import ShowPage
 from generating.frontend.frameworks.html.pages.update_page import UpdatePage
 from generating.generators.crud_dashboard.crud_dashboard_generator import CrudDashboardFrontendGenerator
 from generating.generators.file import GeneratedFile
-from generator.generating.frontend.frameworks.html.elements.favicon import Favicon
-from generator.generating.frontend.frameworks.html.elements.html_element import HtmlElement
-from generator.generating.frontend.frameworks.html.elements.sidebar_element import SidebarHtmlElement
-from generator.generating.frontend.frameworks.html.elements.topbar_element import TopbarHtmlElement
+from generating.frontend.frameworks.html.elements.favicon import Favicon
+from generating.frontend.frameworks.html.elements.html_element import HtmlElement
+from generating.frontend.frameworks.html.elements.sidebar_element import SidebarHtmlElement
+from generating.frontend.frameworks.html.elements.topbar_element import TopbarHtmlElement
 
 
 class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
@@ -32,7 +32,7 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
     def generate(self, app):
         favicon              = Favicon(app_short_name=app.short_name, app_long_name=app.name)
         for file in favicon.get_files():
-            self.add_page_to_files(app, 'frontend/'+file.get_path(), file.get_read_function())
+           app.add_file(GeneratedFile('frontend/'+file.get_path(), file.get_read_function()))
 
         sidebar_html_element = self.generate_sidebar(app)
         topbar_html_element  = self.generate_topbar(app)
@@ -93,7 +93,7 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
         ]
         framework_sidebar = None
         for framework in app.get_active_frontend_libraries():
-            created_sidebar = framework.generate_sidebar(attributes={'class': 'sidebar'}, elements=sidebar_items)
+            created_sidebar = framework.generate_sidebar(sidebar_items, attributes={'class': 'sidebar'})
             if created_sidebar is not None:
                 framework_sidebar = created_sidebar
 

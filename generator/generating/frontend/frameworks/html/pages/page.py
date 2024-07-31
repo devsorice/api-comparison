@@ -1,8 +1,8 @@
 from typing import List
 from generating.frontend.locales.languages import Language
 from generating.frontend.settings.charset import Charset
-from generator.generating.frontend.frameworks.html.elements.favicon import Favicon
-from generator.generating.frontend.frameworks.html.elements.html_element import HtmlElement
+from generating.frontend.frameworks.html.elements.favicon import Favicon
+from generating.frontend.frameworks.html.elements.html_element import HtmlElement
 
 class Page:
     def __init__(self, title:str='',
