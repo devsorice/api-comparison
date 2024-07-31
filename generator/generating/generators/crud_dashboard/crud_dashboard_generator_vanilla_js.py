@@ -32,13 +32,13 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
 
     def generate(self, app):
         current_script_directory = os.path.dirname(os.path.abspath(__file__))
-        sidebar_css_relative_path = '../frontend/frameworks/html/css/sidebar.css'
+        sidebar_css_relative_path = '../../frontend/frameworks/html/css/sidebar.css'
         sidebar_css_full_path = os.path.join(current_script_directory, sidebar_css_relative_path)
         sidebar_css_absolute_path = os.path.abspath(sidebar_css_full_path)
 
 
 
-        app.add_file(ReadFile('frontend/css/'+file.get_path(), sidebar_css_absolute_path))
+        app.add_file(ReadFile('frontend/css/sidebar.css', sidebar_css_absolute_path))
 
         favicon              = Favicon(app_short_name=app.short_name, app_long_name=app.name)
         for file in favicon.get_files():
