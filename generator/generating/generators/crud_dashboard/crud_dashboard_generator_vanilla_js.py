@@ -11,12 +11,13 @@ from generating.frontend.frameworks.html.pages.page import HtmlPage
 from generating.frontend.frameworks.html.pages.show_page import ShowPage
 from generating.frontend.frameworks.html.pages.update_page import UpdatePage
 from generating.generators.crud_dashboard.crud_dashboard_generator import CrudDashboardFrontendGenerator
-from generating.generators.file import GeneratedFile
+from generating.generators.file import GeneratedFile, ReadFile
 from generating.frontend.frameworks.html.elements.favicon import Favicon
 from generating.frontend.frameworks.html.elements.html_element import HtmlElement
 from generating.frontend.frameworks.html.elements.sidebar_element import SidebarHtmlElement
 from generating.frontend.frameworks.html.elements.topbar_element import TopbarHtmlElement
-
+import os
+import sys
 
 class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
     def page_to_file(self, path:str, page:HtmlPage)-> GeneratedFile | None:
@@ -25,11 +26,20 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
                              )
 
     def add_page_to_files(self, app, path:str, page:HtmlPage):
-        file = self.page_to_file('frontend/'+path, page)
+        file = self.page_to_file('frontend/pages/'+path, page)
         app.add_file(file)
 
 
     def generate(self, app):
+        current_script_directory = os.path.dirname(os.path.abspath(__file__))
+        sidebar_css_relative_path = '../frontend/frameworks/html/css/sidebar.css'
+        sidebar_css_full_path = os.path.join(current_script_directory, sidebar_css_relative_path)
+        sidebar_css_absolute_path = os.path.abspath(sidebar_css_full_path)
+
+
+
+        app.add_file(ReadFile('frontend/css/'+file.get_path(), sidebar_css_absolute_path))
+
         favicon              = Favicon(app_short_name=app.short_name, app_long_name=app.name)
         for file in favicon.get_files():
            app.add_file(GeneratedFile('frontend/'+file.get_path(), file.get_read_function()))

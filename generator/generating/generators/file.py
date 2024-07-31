@@ -2,6 +2,8 @@ import os
 from typing import Callable
 
 
+
+
 class GeneratedFile:
   def __init__(self, path:str, read_function:Callable):
     self.path = path
@@ -21,3 +23,16 @@ class GeneratedFile:
     with open(file_path, "w") as file:
       # Write the string to the file
       file.write(content)
+
+
+
+class ReadFile(GeneratedFile):
+  def __init__(self, path:str, from_path:str):
+    super().__init__(path, self.read)
+    self.path = path
+    self.from_path = from_path
+
+  def read(self):
+    with open(self.from_path, 'r') as file:
+          content = file.read()
+          return content
