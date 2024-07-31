@@ -13,7 +13,7 @@ class HtmlPage:
                 ):
         self.title = title
         self.h1    = title
-        if h1 is not None:
+        if h1 is None:
             self.h1 = title
 
         self.main_content = main_content
@@ -51,7 +51,7 @@ class HtmlPage:
         self.body_element   = HtmlElement(tag='body')
         self.header_element = HtmlElement(tag='header')
         self.main_element   = HtmlElement(tag='main')
-        self.title_element  = HtmlElement(tag='h1', content=h1)
+        self.title_element  = HtmlElement(tag='h1', content=self.h1)
         self.main_element.add_children(self.title_element)
         if main_content:
             self.main_element.add_children(main_content)

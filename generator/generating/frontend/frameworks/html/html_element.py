@@ -48,8 +48,9 @@ class HtmlElement:
             tag_open += self.tag
         if hasattr(self, 'attributes') and isinstance(self.attributes, dict):
             for key, item in self.attributes.items():
-                escaped_item = re.sub(r'[^a-zA-Z0-9]', lambda x: f'&#{ord(x.group())};', item)
-                tag_open += f' {key}="{escaped_item}"'
+                if isinstance(key, str) and key!='' and isinstance(item, str) and item!='':
+                  escaped_item = re.sub(r'[^a-zA-Z0-9]', lambda x: f'&#{ord(x.group())};', item)
+                  tag_open += f' {key}="{escaped_item}"'
         if hasattr(self, 'closing') and self.closing == 'self':
             tag_open += '/'
         tag_open += '>'
@@ -96,5 +97,6 @@ class HtmlElement:
             elif isinstance(self.content, HtmlElement):
                 return self.content.get_html()
             elif isinstance(self.content, list):
-                return ''.join([elem.get_html() for elem in self.content])
+                return ''.join([elem.get_html() if not isinstance(elem, str) else elem for elem in self.content])
+
         return ''

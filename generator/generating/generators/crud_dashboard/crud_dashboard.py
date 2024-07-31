@@ -24,7 +24,7 @@ class CrudDashboard(App):
                    backend:BackendFramewoks=None,
                    database:Databases=None
                    ):
-          super.__init__(self, name)
+          super().__init__(name)
           self.roles = roles
           self.models = models
           self.frontend = frontend

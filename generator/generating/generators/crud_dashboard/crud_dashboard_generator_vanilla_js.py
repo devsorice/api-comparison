@@ -23,12 +23,16 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
                              page.build
                              )
 
+    def add_page_to_files(self, app, path:str, page:HtmlPage):
+        file = self.page_to_file(path, page)
+        app.add_file(file)
+
     def generate(self, app):
         sidebar_html_element = self.generate_sidebar(app)
         topbar_html_element  = self.generate_topbar(app)
 
         dashboard_page      = self.generate_dashboard_page(app)
-        app.add_file('dashboard.html', dashboard_page)
+        self.add_page_to_files(app, 'dashboard.html', dashboard_page)
 
         for model in app.models:
             create_page    =  CreatePage(f'Crea {model.title_singular}')
@@ -46,10 +50,11 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
             show_page.body_element.add_children(sidebar_html_element)
             update_page.body_element.add_children(sidebar_html_element)
 
-            app.add_file(f'{model.slug_singular}/create.html', create_page)
-            app.add_file(f'{model.slug_singular}/list.html', list_page)
-            app.add_file(f'{model.slug_singular}/show.html', show_page)
-            app.add_file(f'{model.slug_singular}/update.html', update_page)
+
+            self.add_page_to_files(app, f'{model.slug_singular}/create.html', create_page)
+            self.add_page_to_files(app, f'{model.slug_singular}/list.html', list_page)
+            self.add_page_to_files(app, f'{model.slug_singular}/show.html', show_page)
+            self.add_page_to_files(app, f'{model.slug_singular}/update.html', update_page)
 
 
 

@@ -38,7 +38,7 @@ class TodolistEntryModel(Model):
   }
 
 
-CrudDashboard(
+generator = CrudDashboard(
       name="Todo Dashboard",
       roles=[
           AdminRole(), #### Can do Everything by default
@@ -49,5 +49,5 @@ CrudDashboard(
       backend=BackendFramewoks.RUST_AXUM,
       database=Databases.POSTGRES
 )
-CrudDashboard.generate_code()
-CrudDashboard.save('generated_code')
+generator.generate_code()
+generator.save('generated_code')
