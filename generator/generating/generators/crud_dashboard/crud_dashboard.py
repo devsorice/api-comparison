@@ -11,7 +11,7 @@ from generating.frontend.frameworks.html.libraries.uikit import Uikit
 from generating.frontend.frameworks.libraries import FrontendLibraries
 import os
 
-from generator.generating.generators.file import ReadFile
+from generating.generators.file import ReadFile
 
 class CrudDashboard(App):
       def __init__(self,

@@ -18,7 +18,7 @@ from generating.frontend.frameworks.html.elements.sidebar_element import Sidebar
 from generating.frontend.frameworks.html.elements.topbar_element import TopbarHtmlElement
 import os
 
-from generator.generating.frontend.frameworks.frameworks import FrontendFrameworks
+from generating.frontend.frameworks.frameworks import FrontendFrameworks
 
 class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
     def page_to_file(self, path:str, page:HtmlPage)-> GeneratedFile | None:
