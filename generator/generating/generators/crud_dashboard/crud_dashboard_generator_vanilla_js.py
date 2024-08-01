@@ -30,6 +30,10 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
         file = self.page_to_file('frontend/pages/'+path, page)
         app.add_file(file)
 
+    def add_index_page(self, app, page:HtmlPage):
+        file = self.page_to_file('frontend/index.html', page)
+        app.add_file(file)
+
 
     def generate(self, app):
         self.fr = FrontendFrameworks.VANILLA_JS_AJAX
@@ -37,8 +41,9 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
 
         app.add_static_asset(self.fr, 'css/sidebar.css',               'frontend/css/sidebar.css')
         app.add_static_asset(self.fr, 'js/sidebar.js',                 'frontend/js/sidebar.js')
-        app.add_static_asset(self.fr, 'web_server/404.html',           'frontend/errors/404.html')
-        app.add_static_asset(self.fr, 'web_server/500.html',           'frontend/errors/500.html')
+        app.add_static_asset(self.fr, 'web_server/404.html',           'frontend/pages/errors/404.html')
+        app.add_static_asset(self.fr, 'web_server/500.html',           'frontend/pages/errors/500.html')
+        app.add_static_asset(self.fr, 'web_server/lighttpd.conf',      'frontend/lighttpd.conf')
         app.add_static_asset(self.fr, 'web_server/docker-compose.yml', 'frontend/docker-compose.yml')
         app.add_static_asset(self.fr, 'web_server/Dockerfile',         'frontend/Dockerfile')
 
@@ -52,7 +57,8 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
         dashboard_page      = self.generate_dashboard_page(app)
         for framework in app.get_active_frontend_libraries():
            framework.process_page(dashboard_page)
-        self.add_page_to_files(app, 'dashboard.html', dashboard_page)
+
+        self.add_index_page(app, dashboard_page)
 
         for model in app.models:
             create_page    =  CreatePage(f'Crea {model.title_singular}', favicon=favicon)
