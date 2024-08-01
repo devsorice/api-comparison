@@ -58,7 +58,7 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
 
         dashboard_page      = self.generate_dashboard_page(app)
         dashboard_page.header_element.add_children(topbar_html_element)
-        dashboard_page.body_element.add_children(sidebar_html_element)
+        dashboard_page.body_element.add_children(sidebar_html_element.set_active(f"/index.html"))
 
         for framework in app.get_active_frontend_libraries():
            framework.process_page(dashboard_page)
@@ -77,10 +77,10 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
             show_page.header_element.add_children(topbar_html_element)
             update_page.header_element.add_children(topbar_html_element)
 
-            create_page.body_element.add_children(sidebar_html_element)
-            list_page.body_element.add_children(sidebar_html_element)
-            show_page.body_element.add_children(sidebar_html_element)
-            update_page.body_element.add_children(sidebar_html_element)
+            create_page.body_element.add_children(sidebar_html_element.set_active(f"/pages/{model.slug_singular}/create.html"))
+            list_page.body_element.add_children(sidebar_html_element.set_active(f"/pages/{model.slug_singular}/list.html"))
+            show_page.body_element.add_children(sidebar_html_element.set_active(f"/pages/{model.slug_singular}/show.html"))
+            update_page.body_element.add_children(sidebar_html_element.set_active(f"/pages/{model.slug_singular}/update.html"))
 
             self.icon_pack.load(create_page)
             self.icon_pack.load(list_page)
@@ -133,8 +133,6 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
         ####SHOULD LOOP THE MODELS
         if sidebar is None:
           sidebar = SidebarHtmlElement(attributes={'class': 'sidebar'}, elements=sidebar_items)
-
-        sidebar.setup_sidebar()
 
         return sidebar
 

@@ -16,11 +16,25 @@ class HtmlElement:
         if class_name and self.attr_get('class')=='':
             self.attr('class', class_name)
 
+    def clone(self):
+        duplicate = self.__class__(**self.__dict__)
+        if not hasattr(self, 'content'):
+            return duplicate
+        elif isinstance(self.content, str):
+            duplicate.content = f"{self.content}"
+        elif isinstance(self.content, HtmlElement):
+            duplicate.content = self.content.clone()
+        elif isinstance(self.content, list):
+            duplicate.content = [elem.clone() if not isinstance(elem, str) else f"{elem}" for elem in self.content]
+        return duplicate
+
     def attr(self, key, value):
         if not hasattr(self, 'attributes'):
             self.attributes = {}
         if isinstance(value, bool) and value:
           self.attributes[key] = True
+        if isinstance(value, bool) and not value:
+          del self.attributes[key]
         else:
           self.attributes[key] = str(value)
 
@@ -97,6 +111,16 @@ class HtmlElement:
         if isinstance(el, str) or isinstance(el, HtmlElement):
             self.content.append(el)
 
+    def add_duplicate(self, el):
+        if not hasattr(self, 'content'):
+            self.content = []
+        elif isinstance(self.content, str) or isinstance(self.content, HtmlElement):
+            self.content = [self.content]
+        elif not isinstance(self.content, list):
+            self.content = []
+
+        if isinstance(el, str) or isinstance(el, HtmlElement):
+            self.content.append(el)
 
     def get_content(self):
         if hasattr(self, 'content'):
