@@ -62,10 +62,10 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
         self.add_index_page(app, dashboard_page)
 
         for model in app.models:
-            create_page    =  CreatePage(f'Crea {model.title_singular}', favicon=favicon)
-            list_page      =  ListPage(f'Lista {model.title_singular}', favicon=favicon)
-            show_page      =  ShowPage(f'Mostra {model.title_singular}', favicon=favicon)
-            update_page    =  UpdatePage(f'Aggiorna {model.title_singular}', favicon=favicon)
+            create_page    =  CreatePage(f'Crea {model.title_singular}',     favicon=favicon, description=f'Pagina con form per creare una nuova entità di tipo {model.title_singular}')
+            list_page      =  ListPage(f'Lista {model.title_singular}',      favicon=favicon, description=f'Pagina di lista per cercare e visualizzare tutte le entità di tipo {model.title_singular} memorizzate')
+            show_page      =  ShowPage(f'Mostra {model.title_singular}',     favicon=favicon, description=f'Pagina per visualizzare il dettaglio di una singola entità di tipo {model.title_singular}')
+            update_page    =  UpdatePage(f'Aggiorna {model.title_singular}', favicon=favicon, description=f"Pagina con form per aggiornare un'entità di tipo {model.title_singular} già esistente")
 
             create_page.header_element.add_children(topbar_html_element)
             list_page.header_element.add_children(topbar_html_element)
@@ -95,10 +95,9 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
 
     def generate_sidebar(self, app):
         sidebar_items = [
-            {'icon': 'fa-home', 'title': 'Home', 'href': '/home'},
+            {'icon': 'fa fa-home', 'title': 'Home', 'href': '/home'},
             {'title': 'Profile', 'href': '/profile'},  # No icon here
-            HtmlElement(tag='div', content='Custom HTML Element', attributes={'class': 'custom-element'}),
-            {'title':'test children', 'icon':'fa-file-word', 'open':False,
+            {'title':'test children', 'icon':'fa fa-file-word', 'open':False,
              'children':[
                   {
                       "title" : "Utenti",

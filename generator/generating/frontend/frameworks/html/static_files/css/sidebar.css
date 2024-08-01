@@ -22,14 +22,16 @@ main {
   z-index: 2;
 }
 
-.page-sidebar>nav>ul>li>a {
+.page-sidebar>nav>ul>li>a,
+.page-sidebar>nav>ul>li>span {
   font-size: 16px;
   transition: all .15s ease-out;
   margin-top: 4px;
   padding: 8px 10px;
 }
 
-.page-sidebar>nav>ul>li>a:hover {
+.page-sidebar>nav>ul>li>a:hover,
+.page-sidebar>nav>ul>li>span:hover {
   background-color: rgba(0, 0, 0, .1);
   border-left: 2px solid #39f;
   color: #fff;
@@ -37,7 +39,7 @@ main {
 }
 
 
-.page-sidebar>nav>ul>li.parent>a:after {
+.page-sidebar>nav>ul>li.parent>span:after {
   background-image: url("data:image/svg+xml;charset=utf-8,%3Csvg width='14' height='14' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath fill='none' stroke='rgba(255, 255, 255, 0.7)' stroke-width='1.1' d='M10 1 4 7l6 6'/%3E%3C/svg%3E");
   background-position: 50% 50%;
   background-repeat: no-repeat;

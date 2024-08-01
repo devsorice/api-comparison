@@ -19,6 +19,7 @@ class Page:
 
 class HtmlPage(Page):
     def __init__(self, title:str='',
+                       description:str='',
                        language:Language=Language.ENGLISH,
                        charset:Charset=Charset.UTF_8,
                        h1:str|None=None,
@@ -33,6 +34,7 @@ class HtmlPage(Page):
         self.h1    = title
         if h1 is None:
             self.h1 = title
+        self.description = description
 
         self.main_content = main_content
 
@@ -59,11 +61,18 @@ class HtmlPage(Page):
         )
         self.head_element.add_children(
             HtmlElement(tag='meta', attributes={
+                'name':'viewport',
                 'content':'width=device-width, initial-scale=1.0'
             })
         )
         self.head_element.add_children(
             HtmlElement(tag='title', content=title)
+        )
+        self.head_element.add_children(
+            HtmlElement(tag='meta', attributes={
+                'name':'description',
+                'content':description
+            })
         )
         self.favicon = favicon
         if self.favicon is None:

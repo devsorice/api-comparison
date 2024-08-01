@@ -10,6 +10,7 @@ class Uikit(FrontendLibrary):
     page.add_css('https://cdn.jsdelivr.net/npm/uikit@3.21.8/dist/css/uikit.min.css')
     page.add_css('https://use.fontawesome.com/releases/v5.6.1/css/all.css')
     page.add_css('/css/sidebar.css')
+    page.add_css('/js/sidebar.js')
 
 
   def generate_sidebar(self, elements, **params):

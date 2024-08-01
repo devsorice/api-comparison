@@ -17,8 +17,8 @@ class SidebarHtmlElement(HtmlElement):
     def create_li(self):
         return HtmlElement(tag='li')
 
-    def create_sidebar_link(self, title='', href=None, icon=None):
-      a = HtmlElement(tag='a')
+    def create_sidebar_link(self, title='', href=None, icon=None, tag='a'):
+      a = HtmlElement(tag=tag)
       if href is not None:
         a.attr('href', href)
       if icon is not None:
@@ -32,23 +32,26 @@ class SidebarHtmlElement(HtmlElement):
     def create_sidebar_li(self, element:dict):
         li = HtmlElement(tag='li')
 
+        _link_tag = 'a'
         _open = element.get('open', False)
         _has_children = 'children' in element and element['children']
         _parent_class = 'parent'
         _class_name = ''
+        href  = element.get('href', None)
         if _has_children:
           _class_name   = _parent_class
+          _link_tag     = 'span'
+          href          = None
         if _open:
            _class_name += ' open'
-
         title = element.get('title', '')
-        href  = element.get('href', None)
+
         children = element.get('children', None)
         icon = element.get('icon', None)
 
         #####TESTO PRINCIPALE
         li.add_class(_class_name)
-        a = self.create_sidebar_link(title=title, href=href, icon=icon)
+        a = self.create_sidebar_link(title=title, href=href, icon=icon, tag=_link_tag)
         li.add_children(a)
 
         if _has_children:
@@ -93,8 +96,8 @@ class UiKitSidebarElement(SidebarHtmlElement):
     def create_li(self):
         return HtmlElement(tag='li', _class='uk-parent')
 
-    def create_sidebar_link(self, title='', href=None, icon=None):
-      a = HtmlElement(tag='a')
+    def create_sidebar_link(self, title='', href=None, icon=None, tag='a'):
+      a = HtmlElement(tag=tag)
       if href is not None:
         a.attr('href', href)
       if icon is not None:
@@ -107,24 +110,28 @@ class UiKitSidebarElement(SidebarHtmlElement):
 
     def create_sidebar_li(self, element:dict):
         li = HtmlElement(tag='li')
-
+        _link_tag = 'a'
         _open = element.get('open', False)
         _has_children = 'children' in element and element['children']
         _parent_class = 'uk-parent parent'
         _class_name = ''
+        href  = element.get('href', None)
+
         if _has_children:
           _class_name   = _parent_class
+          _link_tag     = 'span'
+          href          = None
         if _open:
-           _class_name += ' uk-open'
+           _class_name += ' uk-open open'
 
         title = element.get('title', '')
-        href  = element.get('href', None)
+
         children = element.get('children', None)
         icon = element.get('icon', None)
 
         #####TESTO PRINCIPALE
         li.add_class(_class_name)
-        a = self.create_sidebar_link(title=title, href=href, icon=icon)
+        a = self.create_sidebar_link(title=title, href=href, icon=icon, tag=_link_tag)
         li.add_children(a)
 
         if _has_children:
