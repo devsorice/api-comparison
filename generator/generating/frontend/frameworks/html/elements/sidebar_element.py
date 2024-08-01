@@ -25,7 +25,7 @@ class SidebarHtmlElement(HtmlElement):
           i = HtmlElement(tag='i')
           i.add_class(icon)
           a.add_children(i)
-      a.add_children(HtmlElement(tag='span', content=title))
+      a.add_children(HtmlElement(tag='span', content=title, __class='title'))
       a.add_children(HtmlElement(tag='span', _class='arrow'))
       return a
 
@@ -40,7 +40,7 @@ class SidebarHtmlElement(HtmlElement):
         href  = element.get('href', None)
         if _has_children:
           _class_name   = _parent_class
-          _link_tag     = 'span'
+          _link_tag     = 'div'
           href          = None
         if _open:
            _class_name += ' open'
@@ -104,7 +104,7 @@ class UiKitSidebarElement(SidebarHtmlElement):
           i = HtmlElement(tag='i')
           i.add_class(icon)
           a.add_children(i)
-      a.add_children(HtmlElement(tag='span', content=title))
+      a.add_children(HtmlElement(tag='span', content=title, __class='title'))
       a.add_children(HtmlElement(tag='span', _class='arrow'))
       return a
 
@@ -119,7 +119,7 @@ class UiKitSidebarElement(SidebarHtmlElement):
 
         if _has_children:
           _class_name   = _parent_class
-          _link_tag     = 'span'
+          _link_tag     = 'div'
           href          = None
         if _open:
            _class_name += ' uk-open open'
