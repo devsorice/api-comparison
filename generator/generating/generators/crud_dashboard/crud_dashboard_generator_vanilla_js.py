@@ -19,6 +19,7 @@ from generating.frontend.frameworks.html.elements.topbar_element import TopbarHt
 import os
 
 from generating.frontend.frameworks.frameworks import FrontendFrameworks
+from generating.frontend.icons.icon import Icon
 
 class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
     def page_to_file(self, path:str, page:HtmlPage)-> GeneratedFile | None:
@@ -37,7 +38,7 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
 
     def generate(self, app):
         self.fr = FrontendFrameworks.VANILLA_JS_AJAX
-
+        self.icon_pack = app.get_icon_pack()
 
         app.add_static_asset(self.fr, 'css/sidebar.css',               'frontend/css/sidebar.css')
         app.add_static_asset(self.fr, 'js/sidebar.js',                 'frontend/js/sidebar.js')
@@ -56,14 +57,18 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
         topbar_html_element  = self.generate_topbar(app)
 
         dashboard_page      = self.generate_dashboard_page(app)
+        dashboard_page.header_element.add_children(topbar_html_element)
+        dashboard_page.body_element.add_children(sidebar_html_element)
+
         for framework in app.get_active_frontend_libraries():
            framework.process_page(dashboard_page)
+        self.icon_pack.load(dashboard_page)
 
         self.add_index_page(app, dashboard_page)
 
         for model in app.models:
             create_page    =  CreatePage(f'Crea {model.title_singular}',     favicon=favicon, description=f'Pagina con form per creare una nuova entità di tipo {model.title_singular}')
-            list_page      =  ListPage(f'Lista {model.title_singular}',      favicon=favicon, description=f'Pagina di lista per cercare e visualizzare tutte le entità di tipo {model.title_singular} memorizzate')
+            list_page      =  ListPage(f'Lista {model.title_plural}',      favicon=favicon, description=f'Pagina di lista per cercare e visualizzare tutte le entità di tipo {model.title_singular} memorizzate')
             show_page      =  ShowPage(f'Mostra {model.title_singular}',     favicon=favicon, description=f'Pagina per visualizzare il dettaglio di una singola entità di tipo {model.title_singular}')
             update_page    =  UpdatePage(f'Aggiorna {model.title_singular}', favicon=favicon, description=f"Pagina con form per aggiornare un'entità di tipo {model.title_singular} già esistente")
 
@@ -76,6 +81,12 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
             list_page.body_element.add_children(sidebar_html_element)
             show_page.body_element.add_children(sidebar_html_element)
             update_page.body_element.add_children(sidebar_html_element)
+
+            self.icon_pack.load(create_page)
+            self.icon_pack.load(list_page)
+            self.icon_pack.load(show_page)
+            self.icon_pack.load(update_page)
+
 
 
             for framework in app.get_active_frontend_libraries():
@@ -92,23 +103,26 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
 
 
 
-
     def generate_sidebar(self, app):
         sidebar_items = [
-            {'icon': 'fa fa-home', 'title': 'Home', 'href': '/home'},
-            {'title': 'Profile', 'href': '/profile'},  # No icon here
-            {'title':'test children', 'icon':'fa fa-file-word', 'open':False,
-             'children':[
-                  {
-                      "title" : "Utenti",
-                      "href" : "/users/list"
-                  },
-                  {
-                      "title" : "Aggiungi Utente",
-                      "href" : "/users/add"
-                  }
-             ] }
+            {'title':'Dashboard', 'icon':self.icon_pack.translate_icon(Icon.HOME), 'href':'/index.html', 'selected':True}
         ]
+
+        for model in app.get_models():
+            item = {}
+            item['open'] = False
+            item['title'] = model.title_singular
+            if hasattr(model, 'icon') and isinstance(model.icon, Icon):
+              item['icon'] = self.icon_pack.translate_icon(model.icon)
+            item['children'] = []
+            item['children'].append({'title':f"Crea {model.title_singular}", 'href':f'/pages/{model.slug_singular}/create.html'})
+            item['children'].append({'title':f"Lista {model.title_plural}", 'href':f'/pages/{model.slug_singular}/list.html'})
+            item['children'].append({'title':f"Mostra {model.title_singular}", 'href':f'/pages/{model.slug_singular}/show.html'})
+            item['children'].append({'title':f"Modifica {model.title_singular}", 'href':f'/pages/{model.slug_singular}/update.html'})
+            sidebar_items.append(item)
+
+
+
         framework_sidebar = None
         for framework in app.get_active_frontend_libraries():
             created_sidebar = framework.generate_sidebar(sidebar_items, attributes={'class': 'sidebar'})

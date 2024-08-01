@@ -3,7 +3,7 @@ from generating.auth.admin import AdminRole
 from generating.auth.user import UserRole
 from generating.backend.databases import Databases
 from generating.backend.frameworks import BackendFramewoks
-from generating.frontend.frameworks.frameworks import FrontendFrameworks
+from generating.frontend.frameworks.frameworks import FrontendFramework, FrontendFrameworks
 from generating.frontend.icons.fontawesome_icon_pack import FontAwesomeIconPack
 from generating.frontend.icons.icon import Icon
 from generating.generators.crud_dashboard.crud_dashboard import CrudDashboard
@@ -29,8 +29,8 @@ class TodolistEntryModel(Model):
   icon           = Icon.CHECK
   slug_singular  = 'todo'
   slug_plural    = 'todos'
-  title_singular = 'Da Fare'
-  title_plural   = 'Cose Da Fare'
+  title_singular = 'Cosa da Fare'
+  title_plural   = 'Cose da Fare'
 
 
   fields = {
@@ -47,7 +47,7 @@ generator = CrudDashboard(
           UserRole()   ###  Can't do Anything by default
       ],
       models=[UserModel(), TodolistEntryModel()],
-      frontend=FrontendFrameworks.VANILLA_JS_AJAX  + FontAwesomeIconPack + FrontendLibraries.UI_KIT,
+      frontend=FrontendFramework(FrontendFrameworks.VANILLA_JS_AJAX , FontAwesomeIconPack, [FrontendLibraries.CRUD_LIB]),
       backend=BackendFramewoks.RUST_AXUM,
       database=Databases.POSTGRES
 )

@@ -4,7 +4,11 @@ from generating.frontend.icons.icon_pack import IconPack
 
 class FontAwesomeIconPack(IconPack):
     @staticmethod
-    def translate_icon(icon):
+    def load(page):
+        page.add_css('https://use.fontawesome.com/releases/v5.6.1/css/all.css')
+
+    @staticmethod
+    def translate_icon(icon, style='fa'):
         icon_classes = {
             Icon.AD: 'fa-ad',
             Icon.ADDRESS_BOOK: 'fa-address-book',
@@ -989,4 +993,7 @@ class FontAwesomeIconPack(IconPack):
             Icon.YEN_SIGN: 'fa-yen-sign',
             Icon.YIN_YANG: 'fa-yin-yang'
         }
-        return icon_classes.get(icon, '')
+        icon = icon_classes.get(icon, '')
+        if icon!='':
+            return f'{style} {icon}'
+        return icon

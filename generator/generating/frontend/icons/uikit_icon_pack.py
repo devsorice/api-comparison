@@ -4,7 +4,7 @@ from generating.frontend.icons.icon_pack import IconPack
 
 class UIKitIconPack(IconPack):
     @staticmethod
-    def translate_icon(icon):
+    def translate_icon(icon, style:str=''):
         icon_classes = {
             Icon.HOME: 'uk-icon-home',
             Icon.USER: 'uk-icon-user',

@@ -7,11 +7,7 @@ class Uikit(FrontendLibrary):
 
   def process_page(self, page:HtmlPage):
     ###DOVREI CARICARE SOLO QUELLO CHE MI SERVE E NON DA UN PROGETTO ESTERNO
-    ####page.add_css('https://cdn.jsdelivr.net/npm/uikit@3.21.8/dist/css/uikit.min.css')
-    page.add_css('https://use.fontawesome.com/releases/v5.6.1/css/all.css')
-    page.add_css('/css/sidebar.css')
-    page.add_js('/js/sidebar.js')
-
+    page.add_css('https://cdn.jsdelivr.net/npm/uikit@3.21.8/dist/css/uikit.min.css')
 
   def generate_sidebar(self, elements, **params):
     return UiKitSidebarElement(elements, **params)

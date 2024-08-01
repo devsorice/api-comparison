@@ -149,6 +149,21 @@ nav li>a {
   cursor: pointer;
 }
 
+.page-sidebar>nav>ul>li>a.active,
+.page-sidebar>nav>ul>li>div.active,
+.page-sidebar nav ul.nav-sub>li>a.active {
+  background-color: #ffffff24;
+  border-radius: 5px;
+}
+
+.page-sidebar nav ul.nav-sub>li>a.active {
+  padding-left: 12px;
+  padding-top: 6px;
+  padding-bottom: 6px;
+  margin-left: -13px;
+}
+
+
 .page-sidebar>nav>ul>li>div {
   display: flex;
 }

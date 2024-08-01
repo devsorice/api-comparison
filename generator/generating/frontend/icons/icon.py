@@ -420,7 +420,7 @@ class Icon(Enum):
     H_SQUARE = auto()
     HAMBURGER = auto()
     HAMMER = auto()
-    HAMSER = auto()
+    HAMSA = auto()
     HAND_HOLDING = auto()
     HAND_HOLDING_HEART = auto()
     HAND_HOLDING_USD = auto()

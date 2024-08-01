@@ -6,6 +6,7 @@ from generating.frontend.frameworks.html.elements.html_element import HtmlElemen
 class SidebarHtmlElement(HtmlElement):
     def __init__(self, elements, **params):
         super().__init__(tag='aside', **params)
+        self.attr('class', 'page-sidebar')
         self.elements = elements if elements is not None else []
 
         self.nav_wrap = HtmlElement(tag='nav', _class='left-nav-wrap')
@@ -55,7 +56,7 @@ class SidebarHtmlElement(HtmlElement):
         li.add_children(a)
 
         if _has_children:
-           ul = HtmlElement('ul', _class='nav-sub')
+           ul = HtmlElement(tag='ul', _class='nav-sub')
            if not _open:
               ul.attr('hidden',True)
            for child in children:
