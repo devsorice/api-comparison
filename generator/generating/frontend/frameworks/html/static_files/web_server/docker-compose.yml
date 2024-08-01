@@ -1,0 +1,8 @@
+services:
+  web:
+    build: .
+    ports:
+      - "8562:80"
+    volumes:
+      - ./:/var/www/localhost/htdocs
+    restart: always

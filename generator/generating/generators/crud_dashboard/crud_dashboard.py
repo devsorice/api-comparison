@@ -9,20 +9,11 @@ from generating.generators.crud_dashboard.crud_dashboard_generator_vanilla_js im
 from generating.model.model import Model
 from generating.frontend.frameworks.html.libraries.uikit import Uikit
 from generating.frontend.frameworks.libraries import FrontendLibraries
+import os
 
+from generator.generating.generators.file import ReadFile
 
 class CrudDashboard(App):
-      frontend_libraries = {
-          FrontendLibraries.UI_KIT:Uikit()
-      }
-      active_frontend_libraries = []
-
-      frontend_generators = {
-         FrontendFrameworks.VANILLA_JS_AJAX:CrudDahboardVanillaJSGenerator()
-      }
-      backend_generators  = {}
-      database_generators = {}
-
       def __init__(self,
                    name:str,
                    short_name:str|None=None,
@@ -38,6 +29,21 @@ class CrudDashboard(App):
           self.frontend = frontend
           self.backend = backend
           self.database = database
+
+          self.frontend_libraries = {
+            FrontendLibraries.UI_KIT:Uikit()
+          }
+          self.active_frontend_libraries = []
+
+          self.frontend_generators = {
+            FrontendFrameworks.VANILLA_JS_AJAX:CrudDahboardVanillaJSGenerator()
+          }
+          self.static_files_folder = {
+              FrontendFrameworks.VANILLA_JS_AJAX:'../../frontend/frameworks/html/static_files'
+          }
+
+          self.backend_generators  = {}
+          self.database_generators = {}
 
 
 
@@ -71,3 +77,16 @@ class CrudDashboard(App):
       def get_active_frontend_libraries(self):
           return self.active_frontend_libraries
 
+      def get_static_asset_path(self, framework:FrontendFrameworks|BackendFramewoks, path:str=''):
+        relative_path = self.static_files_folder.get(framework, None)
+        if relative_path is not None:
+          current_script_directory = os.path.dirname(os.path.abspath(__file__))
+          if path!='':
+            relative_path = f'{relative_path}/{path}'
+          full_path = os.path.join(current_script_directory, relative_path)
+          absolute_path = os.path.abspath(full_path)
+          return absolute_path
+
+      def add_static_asset(self,  framework:FrontendFrameworks|BackendFramewoks, from_path:str, destination_path:str):
+         read_path = self.get_static_asset_path(framework, from_path)
+         self.add_file(ReadFile(destination_path, read_path ))

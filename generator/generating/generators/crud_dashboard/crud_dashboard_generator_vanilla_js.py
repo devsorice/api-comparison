@@ -11,13 +11,14 @@ from generating.frontend.frameworks.html.pages.page import HtmlPage
 from generating.frontend.frameworks.html.pages.show_page import ShowPage
 from generating.frontend.frameworks.html.pages.update_page import UpdatePage
 from generating.generators.crud_dashboard.crud_dashboard_generator import CrudDashboardFrontendGenerator
-from generating.generators.file import GeneratedFile, ReadFile
+from generating.generators.file import GeneratedFile, ReadFile, StringFile
 from generating.frontend.frameworks.html.elements.favicon import Favicon
 from generating.frontend.frameworks.html.elements.html_element import HtmlElement
 from generating.frontend.frameworks.html.elements.sidebar_element import SidebarHtmlElement
 from generating.frontend.frameworks.html.elements.topbar_element import TopbarHtmlElement
 import os
-import sys
+
+from generator.generating.frontend.frameworks.frameworks import FrontendFrameworks
 
 class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
     def page_to_file(self, path:str, page:HtmlPage)-> GeneratedFile | None:
@@ -31,14 +32,15 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
 
 
     def generate(self, app):
-        current_script_directory = os.path.dirname(os.path.abspath(__file__))
-        sidebar_css_relative_path = '../../frontend/frameworks/html/css/sidebar.css'
-        sidebar_css_full_path = os.path.join(current_script_directory, sidebar_css_relative_path)
-        sidebar_css_absolute_path = os.path.abspath(sidebar_css_full_path)
+        self.fr = FrontendFrameworks.VANILLA_JS_AJAX
 
 
-        app.add_file(GeneratedFile('frontend/start_frontend.sh', lambda: 'python -m http.server 8230'))
-        app.add_file(ReadFile('frontend/css/sidebar.css', sidebar_css_absolute_path))
+        app.add_static_asset(self.fr, 'frontend/css/sidebar.css', 'css/sidebar.css')
+        app.add_static_asset(self.fr, 'frontend/js/sidebar.js',   'js/sidebar.js')
+        app.add_static_asset(self.fr, 'frontend/errors/404.html', 'web_server/404.html')
+        app.add_static_asset(self.fr, 'frontend/errors/500.html', 'web_server/500.html')
+        app.add_static_asset(self.fr, 'frontend/docker-compose.yml', 'web_server/docker-compose.yml')
+        app.add_static_asset(self.fr, 'frontend/Dockerfile', 'web_server/Dockerfile')
 
         favicon              = Favicon(app_short_name=app.short_name, app_long_name=app.name)
         for file in favicon.get_files():

@@ -25,6 +25,14 @@ class GeneratedFile:
       file.write(content)
 
 
+class StringFile(GeneratedFile):
+  def __init__(self, path:str, str_data:str):
+    super().__init__(path, self.read)
+    self.path = path
+    self.str_data = str_data
+
+  def read(self):
+    return self.str_data
 
 class ReadFile(GeneratedFile):
   def __init__(self, path:str, from_path:str):
