@@ -1,6 +1,28 @@
 services:
+  build-test:
+    build:
+      args:
+        - VERSION=1.4.76
+        - CHECKSUM=ba14a030889518194fd88b33e419d51cc38c8fe917126d5a7a965be79b53e995
+      context: .
+      dockerfile: Dockerfile
+      target: build
+    command: sh
+    tty: true
+    restart: always
+
+  build:
+    image: sorice/lighttpd:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: server
     ports:
       - "8562:80"
     volumes:
