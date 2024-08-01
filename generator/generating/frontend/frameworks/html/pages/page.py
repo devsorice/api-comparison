@@ -115,6 +115,10 @@ class HtmlPage(Page):
                   'rel':'stylesheet',
                   'href':path
                 }))
+    def add_js(self, path):
+        self.body_element.add_children(HtmlElement(tag='script', attributes={
+                  'src':path
+                }))
 
     def build(self):
         html =  '<!DOCTYPE html>'

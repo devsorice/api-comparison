@@ -14,7 +14,7 @@ class Favicon:
       favicon_svg:str|None         = '/favicon.svg',
       favicon_ico:str|None         = '/favicon.ico',
       favicon_apple_touch:str|None = '/apple-touch-icon.png',
-      theme_color:str|None         = '#fdfdfd"',
+      theme_color:str|None         = '#fdfdfd',
       background_color:str|None    = '#c5d3e3',
       favicon_192x192:str|None     = '/web-app-manifest-192x192.png',
       favicon_512x512:str|None     = '/web-app-manifest-512x512.png',

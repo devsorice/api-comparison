@@ -108,6 +108,29 @@ nav li>a {
   color: rgba(255, 255, 255, .5);
 }
 
+.page-sidebar nav ul.nav-sub {
+  margin-left: 36px;
+  margin-top: 2px;
+}
+
+.page-sidebar nav ul.nav-sub li {
+  padding: 5px;
+}
+
+.page-sidebar nav ul.nav-sub li a:hover {
+  color: white;
+}
+
+.page-sidebar span,
+.page-sidebar a {
+  -webkit-user-select: none;
+  /* Safari */
+  -ms-user-select: none;
+  /* IE 10 and IE 11 */
+  user-select: none;
+  /* Standard syntax */
+}
+
 .page-sidebar i {
   margin-right: 10px;
   font-size: 22px;

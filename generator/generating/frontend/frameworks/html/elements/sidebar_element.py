@@ -55,7 +55,7 @@ class SidebarHtmlElement(HtmlElement):
         li.add_children(a)
 
         if _has_children:
-           ul = HtmlElement('ul')
+           ul = HtmlElement('ul', _class='nav-sub')
            if not _open:
               ul.attr('hidden',True)
            for child in children:
@@ -135,7 +135,7 @@ class UiKitSidebarElement(SidebarHtmlElement):
         li.add_children(a)
 
         if _has_children:
-           ul = HtmlElement(tag='ul', _class='uk-nav-sub')
+           ul = HtmlElement(tag='ul', _class='uk-nav-sub nav-sub')
            if not _open:
               ul.attr('hidden',True)
            for child in children:
