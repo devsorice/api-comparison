@@ -1,4 +1,4 @@
-FROM alpine:latest
+FROM alpine:3.20.2
 
 # Install lighttpd
 RUN apk update && apk add lighttpd
