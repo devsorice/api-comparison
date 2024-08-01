@@ -35,12 +35,12 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
         self.fr = FrontendFrameworks.VANILLA_JS_AJAX
 
 
-        app.add_static_asset(self.fr, 'frontend/css/sidebar.css', 'css/sidebar.css')
-        app.add_static_asset(self.fr, 'frontend/js/sidebar.js',   'js/sidebar.js')
-        app.add_static_asset(self.fr, 'frontend/errors/404.html', 'web_server/404.html')
-        app.add_static_asset(self.fr, 'frontend/errors/500.html', 'web_server/500.html')
-        app.add_static_asset(self.fr, 'frontend/docker-compose.yml', 'web_server/docker-compose.yml')
-        app.add_static_asset(self.fr, 'frontend/Dockerfile', 'web_server/Dockerfile')
+        app.add_static_asset(self.fr, 'css/sidebar.css',               'frontend/css/sidebar.css')
+        app.add_static_asset(self.fr, 'js/sidebar.js',                 'frontend/js/sidebar.js')
+        app.add_static_asset(self.fr, 'web_server/404.html',           'frontend/errors/404.html')
+        app.add_static_asset(self.fr, 'web_server/500.html',           'frontend/errors/500.html')
+        app.add_static_asset(self.fr, 'web_server/docker-compose.yml', 'frontend/docker-compose.yml')
+        app.add_static_asset(self.fr, 'web_server/Dockerfile',         'frontend/Dockerfile')
 
         favicon              = Favicon(app_short_name=app.short_name, app_long_name=app.name)
         for file in favicon.get_files():
