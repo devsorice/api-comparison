@@ -46,6 +46,7 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
         app.add_static_asset(self.fr, 'web_server/lighttpd.conf',      'frontend/lighttpd.conf')
         app.add_static_asset(self.fr, 'web_server/docker-compose.yml', 'frontend/docker-compose.yml')
         app.add_static_asset(self.fr, 'web_server/Dockerfile',         'frontend/Dockerfile')
+        app.add_file(StringFile('frontend/up.sh', 'docker compose up -d --build --remove-orphans'))
 
         favicon              = Favicon(app_short_name=app.short_name, app_long_name=app.name)
         for file in favicon.get_files():
