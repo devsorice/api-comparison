@@ -27,4 +27,6 @@ services:
       - "8562:80"
     volumes:
       - ./:/var/www/localhost/htdocs
+      - ./lighttpd.conf:/lighttpd.conf
     restart: always
+    #tty: true

@@ -14,7 +14,7 @@ RUN [ "$(sha256sum /tmp/lighttpd.tar.gz | awk '{print $1}')" = "$CHECKSUM" ] && 
 
 RUN mkdir -p /rootfs/bin && \
   cp /tmp/lighttpd-$VERSION/sconsbuild/fullstatic/build/lighttpd /rootfs/bin/ && \
-  mkdir -p /rootfs/etc /rootfsvar/tmp && \
+  mkdir -p /rootfs/etc /rootfs/var/tmp && \
   echo "nogroup:*:10000:nobody" > /rootfs/etc/group && \
   echo "nobody:*:10000:10000:::" > /rootfs/etc/passwd
 
@@ -39,7 +39,9 @@ CMD ["-D", "-f", "/lighttpd.conf"]
 ###################################################################
 ############# This is the container that will run our app #############
 FROM base as server
+#FROM build as server
 # Copy lighttpd configuration file
 COPY lighttpd.conf /lighttpd.conf
 # Copy static files to the web server directory
 COPY ./ /var/www/localhost/htdocs
+#CMD ["/bin/sh"]
