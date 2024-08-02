@@ -42,6 +42,8 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
 
         app.add_static_asset(self.fr, 'css/sidebar.css',               'frontend/css/sidebar.css')
         app.add_static_asset(self.fr, 'js/sidebar.js',                 'frontend/js/sidebar.js')
+        app.add_static_asset(self.fr, 'css/table.css',                 'frontend/css/table.css')
+        app.add_static_asset(self.fr, 'js/table.js',                   'frontend/js/table.js')
         app.add_static_asset(self.fr, 'web_server/404.html',           'frontend/pages/errors/404.html')
         app.add_static_asset(self.fr, 'web_server/500.html',           'frontend/pages/errors/500.html')
         app.add_static_asset(self.fr, 'web_server/lighttpd.conf',      'frontend/lighttpd.conf')
@@ -67,10 +69,10 @@ class CrudDahboardVanillaJSGenerator(CrudDashboardFrontendGenerator):
         self.add_index_page(app, dashboard_page)
 
         for model in app.models:
-            create_page    =  CreatePage(f'Crea {model.title_singular}',     favicon=favicon, description=f'Pagina con form per creare una nuova entità di tipo {model.title_singular}')
-            list_page      =  ListPage(f'Lista {model.title_plural}',      favicon=favicon, description=f'Pagina di lista per cercare e visualizzare tutte le entità di tipo {model.title_singular} memorizzate')
-            show_page      =  ShowPage(f'Mostra {model.title_singular}',     favicon=favicon, description=f'Pagina per visualizzare il dettaglio di una singola entità di tipo {model.title_singular}')
-            update_page    =  UpdatePage(f'Aggiorna {model.title_singular}', favicon=favicon, description=f"Pagina con form per aggiornare un'entità di tipo {model.title_singular} già esistente")
+            create_page    =  CreatePage(model,f'Crea {model.title_singular}',     favicon=favicon, description=f'Pagina con form per creare una nuova entità di tipo {model.title_singular}')
+            list_page      =  ListPage(model,f'Lista {model.title_plural}',      favicon=favicon, description=f'Pagina di lista per cercare e visualizzare tutte le entità di tipo {model.title_singular} memorizzate')
+            show_page      =  ShowPage(model, f'Mostra {model.title_singular}',     favicon=favicon, description=f'Pagina per visualizzare il dettaglio di una singola entità di tipo {model.title_singular}')
+            update_page    =  UpdatePage(model, f'Aggiorna {model.title_singular}', favicon=favicon, description=f"Pagina con form per aggiornare un'entità di tipo {model.title_singular} già esistente")
 
             create_page.header_element.add_children(topbar_html_element)
             list_page.header_element.add_children(topbar_html_element)

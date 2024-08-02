@@ -20,9 +20,9 @@ class UserModel(Model):
 
 
   fields = {
-    'id': PrimaryKeyField(importance=2),
-    'name': ShortTextField(is_title=True, listable=True, duplicateable=True),
-    'email': EmailField(listable=True, importance=1)
+    'id':    PrimaryKeyField(title='ID'   , importance=2),
+    'name':  ShortTextField (title='Name' , is_title=True, listable=True, duplicateable=True),
+    'email': EmailField     (title='Email', listable=True, importance=1)
   }
 
 class TodolistEntryModel(Model):
@@ -47,7 +47,7 @@ generator = CrudDashboard(
           UserRole()   ###  Can't do Anything by default
       ],
       models=[UserModel(), TodolistEntryModel()],
-      frontend=FrontendFramework(FrontendFrameworks.VANILLA_JS_AJAX , FontAwesomeIconPack, [FrontendLibraries.CRUD_LIB, FrontendLibraries.DATA_TABLE]),
+      frontend=FrontendFramework(FrontendFrameworks.VANILLA_JS_AJAX , FontAwesomeIconPack, [FrontendLibraries.DATA_TABLE, FrontendLibraries.CRUD_LIB]),
       backend=BackendFramewoks.RUST_AXUM,
       database=Databases.POSTGRES
 )
