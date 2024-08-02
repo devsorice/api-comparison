@@ -13,6 +13,7 @@ import os
 
 from generating.generators.file import ReadFile
 from generating.frontend.frameworks.html.libraries.crud_lib import CrudLib
+from generating.frontend.frameworks.html.libraries.data_table import DataTable
 
 class CrudDashboard(App):
       def __init__(self,
@@ -35,7 +36,8 @@ class CrudDashboard(App):
 
           self.frontend_libraries = {
             FrontendLibraries.UI_KIT:Uikit(),
-            FrontendLibraries.CRUD_LIB:CrudLib()
+            FrontendLibraries.CRUD_LIB:CrudLib(),
+            FrontendLibraries.DATA_TABLE:DataTable()
           }
           self.active_frontend_libraries = []
 
