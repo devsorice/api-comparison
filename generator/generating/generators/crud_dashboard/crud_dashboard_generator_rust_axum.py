@@ -22,6 +22,7 @@ from generating.frontend.frameworks.frameworks import FrontendFrameworks
 from generating.frontend.icons.icon import Icon
 from generating.backend.frameworks.rust.rust import RustModel
 from generating.backend.frameworks.frameworks import BackendFramewoks
+from generating.backend.frameworks.rust.rust_router import RustRouter
 
 class CrudDahboardRustAxumGenerator(CrudDashboardBackendGenerator):
     def model_to_file(self, path:str, model:RustModel)-> GeneratedFile | None:
@@ -33,6 +34,8 @@ class CrudDahboardRustAxumGenerator(CrudDashboardBackendGenerator):
         file = self.model_to_file(f'backend/models/{model.model.slug_singular}.rs', model)
         app.add_file(file)
 
+    def add_main_file(self, app, readfunct):
+        app.add_file(GeneratedFile('backend/main.rs', readfunct))
 
 
     def generate(self, app):
@@ -42,7 +45,12 @@ class CrudDahboardRustAxumGenerator(CrudDashboardBackendGenerator):
         app.add_static_asset(self.fr, 'web_server/Dockerfile',         'backend/Dockerfile')
         app.add_file(StringFile('frontend/up.sh', 'docker compose up -d --build --remove-orphans'))
 
+        router = RustRouter()
+        router.add_model_routes(app.get_models())
+        self.add_main_file(app, router.generate_rust_router)
         self.generate_models(app)
+
+
 
     def generate_models(self, app):
         for model in app.get_models():
