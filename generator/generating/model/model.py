@@ -1,4 +1,5 @@
 class Model:
+    table          = None
     icon           = None
     slug_singular  = None
     slug_plural    = None

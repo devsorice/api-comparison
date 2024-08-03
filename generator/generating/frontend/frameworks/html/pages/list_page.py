@@ -23,7 +23,6 @@ class ListPage(HtmlPage):
       field = model.fields[field_id]
       if isinstance(field, Field):
         if field.listable:
-          print("listable "+str(field_id))
           tmp_headers.append(
             {'title':field.title, 'importance':field.importance}
           )

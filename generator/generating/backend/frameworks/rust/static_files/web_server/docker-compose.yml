@@ -1,0 +1,18 @@
+services:
+  build-test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: builder
+    command: sh
+    tty: true
+    restart: always
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: server
+    ports:
+      - "8563:80"
+    restart: always

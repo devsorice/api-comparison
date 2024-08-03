@@ -2,7 +2,7 @@ from typing import List
 
 from generating.auth.role import Role
 from generating.backend.databases import Databases
-from generating.backend.frameworks import BackendFramewoks
+from generating.backend.frameworks.frameworks import BackendFramewoks
 from generating.frontend.frameworks.frameworks import FrontendFramework, FrontendFrameworks
 from generating.generators.app import App
 from generating.generators.crud_dashboard.crud_dashboard_generator_vanilla_js import CrudDahboardVanillaJSGenerator
@@ -14,6 +14,7 @@ import os
 from generating.generators.file import ReadFile
 from generating.frontend.frameworks.html.libraries.crud_lib import CrudLib
 from generating.frontend.frameworks.html.libraries.data_table import DataTable
+from generating.generators.crud_dashboard.crud_dashboard_generator_rust_axum import CrudDahboardRustAxumGenerator
 
 class CrudDashboard(App):
       def __init__(self,
@@ -45,10 +46,13 @@ class CrudDashboard(App):
             FrontendFrameworks.VANILLA_JS_AJAX:CrudDahboardVanillaJSGenerator()
           }
           self.static_files_folder = {
-              FrontendFrameworks.VANILLA_JS_AJAX:'../../frontend/frameworks/html/static_files'
+              FrontendFrameworks.VANILLA_JS_AJAX:'../../frontend/frameworks/html/static_files',
+              BackendFramewoks.RUST_AXUM:'../../backend/frameworks/rust/static_files',
           }
 
-          self.backend_generators  = {}
+          self.backend_generators  = {
+             BackendFramewoks.RUST_AXUM:CrudDahboardRustAxumGenerator()
+          }
           self.database_generators = {}
 
 
