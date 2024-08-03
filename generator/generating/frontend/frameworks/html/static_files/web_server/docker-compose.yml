@@ -28,5 +28,9 @@ services:
     volumes:
       - ./:/var/www/localhost/htdocs
       - ./lighttpd.conf:/lighttpd.conf
+    environment:
+      - APP_BACKEND_URL=http://localhost:8000
+      - APP_THEME=GRAY
+      - APP_AAAA=ABA
     restart: always
     #tty: true

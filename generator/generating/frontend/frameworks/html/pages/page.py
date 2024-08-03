@@ -3,6 +3,8 @@ from generating.frontend.locales.languages import Language
 from generating.frontend.settings.charset import Charset
 from generating.frontend.frameworks.html.elements.favicon import Favicon
 from generating.frontend.frameworks.html.elements.html_element import HtmlElement
+from datetime import datetime
+from urllib.parse import urlparse, urlunparse, parse_qs, urlencode
 
 class Page:
     def __init__(self, title:str='',
@@ -111,14 +113,26 @@ class HtmlPage(Page):
 
 
     def add_css(self, path):
+        path_with_version = self.add_version_query_string(path)
         self.head_element.add_children(HtmlElement(tag='link', attributes={
-                  'rel':'stylesheet',
-                  'href':path
-                }))
+            'rel': 'stylesheet',
+            'href': path_with_version
+        }))
+
     def add_js(self, path):
+        path_with_version = self.add_version_query_string(path)
         self.body_element.add_children(HtmlElement(tag='script', attributes={
-                  'src':path
-                }))
+            'src': path_with_version
+        }))
+
+    def add_version_query_string(self, path):
+        url_parts = list(urlparse(path))
+        query = parse_qs(url_parts[4])
+        if not query:
+            version = datetime.now().strftime('%Y%m%d%H%M%S')
+            query['v'] = version
+            url_parts[4] = urlencode(query, doseq=True)
+        return urlunparse(url_parts)
 
     def build(self):
         html =  '<!DOCTYPE html>'

@@ -1,16 +1,22 @@
-# Stage 1: Build lighttpd with required modules
+# Stage 1: Build lighttpd with required modules and compile the C program
 FROM alpine:3.20.2 AS build
 
 ARG VERSION="1.4.76"
 ARG CHECKSUM="ba14a030889518194fd88b33e419d51cc38c8fe917126d5a7a965be79b53e995"
 
+# Download and verify lighttpd
 ADD https://download.lighttpd.net/lighttpd/releases-1.4.x/lighttpd-$VERSION.tar.gz /tmp/lighttpd.tar.gz
-
 RUN [ "$(sha256sum /tmp/lighttpd.tar.gz | awk '{print $1}')" = "$CHECKSUM" ] && \
-  apk add bsd-compat-headers build-base pcre2-dev scons && \
+  apk add --no-cache bsd-compat-headers build-base pcre2-dev scons && \
   tar -C /tmp -xf /tmp/lighttpd.tar.gz && \
   cd /tmp/lighttpd-$VERSION && \
   scons -j 4 build_fullstatic=1 build_dynamic=0
+
+# Copy the C program source file
+COPY start.c /tmp/start.c
+
+# Compile the C program and place the binary in /rootfs/bin
+RUN mkdir -p /rootfs/bin && gcc -static -o /rootfs/bin/start /tmp/start.c
 
 RUN mkdir -p /rootfs/bin && \
   cp /tmp/lighttpd-$VERSION/sconsbuild/fullstatic/build/lighttpd /rootfs/bin/ && \
@@ -45,3 +51,4 @@ COPY lighttpd.conf /lighttpd.conf
 # Copy static files to the web server directory
 COPY ./ /var/www/localhost/htdocs
 #CMD ["/bin/sh"]
+ENTRYPOINT ["/bin/start"]
