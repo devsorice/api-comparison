@@ -1,7 +1,6 @@
-use crate::filters::{build_filter, SqlFilter};
-use crate::statements::*;
-use crate::tables::{SqlTable, SqlTableField};
-use crate::values::SqlValue;
+use std::collections::HashMap;
+
+use super::{components::*, filters::*, statements::*, tables::*, values::*};
 
 // Define enum to handle both simple and aggregated fields
 #[derive(Debug, Clone)]
@@ -18,16 +17,16 @@ pub enum ProjectionField {
 // Structs for different SQL parameters
 #[derive(Debug, Clone)]
 pub struct SelectParams {
-    pub from_table: String,
-    pub projection: Vec<ProjectionField>,
-    pub where_clause: Option<Box<dyn SqlFilter>>,
-    pub join: Vec<String>, // Simplified for example
-    pub groupby: Vec<String>,
-    pub having: Option<Box<dyn SqlFilter>>,
-    pub orderby: Vec<(String, bool)>,
-    pub limit: Option<u32>,
-    pub offset: Option<u32>,
-    pub distinct: bool,
+    pub from_table: SqlTable,
+    pub projection: Option<SqlProjection>,
+    pub where_clause: Option<SqlWhere>,
+    pub join: Option<SqlJoin>, // Simplified for example
+    pub groupby: Option<SqlGroupBy>,
+    pub having: Option<SqlHaving>,
+    pub orderby: Option<SqlOrderBy>,
+    pub limit: Option<SqlLimit>,
+    pub offset: Option<SqlOffset>,
+    pub distinct: Option<SqlDistinct>,
 }
 
 #[derive(Debug, Clone)]
@@ -40,13 +39,13 @@ pub struct InsertParams {
 pub struct UpdateParams {
     pub table: String,
     pub updates: HashMap<String, SqlValue>,
-    pub where_clause: Option<Box<dyn SqlFilter>>,
+    pub where_clause: Option<SqlWhere>,
 }
 
 #[derive(Debug, Clone)]
 pub struct DeleteParams {
     pub from_table: String,
-    pub where_clause: Option<Box<dyn SqlFilter>>,
+    pub where_clause: Option<SqlWhere>,
 }
 
 struct SQLQueryBuilder;
