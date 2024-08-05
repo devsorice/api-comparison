@@ -3,11 +3,23 @@ use crate::statements::*;
 use crate::tables::{SqlTable, SqlTableField};
 use crate::values::SqlValue;
 
+// Define enum to handle both simple and aggregated fields
+#[derive(Debug, Clone)]
+pub enum ProjectionField {
+    Simple(String), // Simple field name
+    Aggregated {
+        // Aggregated field with optional table and aggregation function
+        field: String,
+        table: Option<String>,
+        aggregation: Option<String>,
+    },
+}
+
 // Structs for different SQL parameters
 #[derive(Debug, Clone)]
 pub struct SelectParams {
     pub from_table: String,
-    pub projection: Vec<String>,
+    pub projection: Vec<ProjectionField>,
     pub where_clause: Option<Box<dyn SqlFilter>>,
     pub join: Vec<String>, // Simplified for example
     pub groupby: Vec<String>,
@@ -104,10 +116,10 @@ impl SQLQueryBuilder {
         let mut projection = Vec::new();
         for item in &params.projection {
             match item {
-                Projection::Field(field) => {
+                ProjectionField::Field(field) => {
                     projection.push(SqlTableField::new(field.clone(), None));
                 }
-                Projection::Aggregated {
+                ProjectionField::Aggregated {
                     aggregation,
                     field,
                     table,
