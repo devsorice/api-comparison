@@ -28,6 +28,7 @@ impl SqlAggregationType {
             Self::Min => "MIN",
             Self::Count => "COUNT",
             Self::Distinct => "DISTINCT",
+            _ => "",
         }
     }
 }
@@ -71,6 +72,7 @@ impl SqlJoinType {
             Self::LeftOuterJoin => "LEFT OUTER JOIN",
             Self::RightOuterJoin => "RIGHT OUTER JOIN",
             Self::FullOuterJoin => "FULL OUTER JOIN",
+            _ => "",
         }
     }
 }
@@ -166,6 +168,7 @@ impl LogicalOperator {
             Self::NotEndsWithCaseSensitive => "nendswiths",
             Self::Or => "or",
             Self::And => "and",
+            _ => "",
         }
     }
 
@@ -197,6 +200,7 @@ impl LogicalOperator {
             Self::NotEndsWithCaseSensitive => "NOT LIKE BINARY",
             Self::Or => "OR",
             Self::And => "AND",
+            _ => "",
         }
     }
 }

@@ -1,34 +1,112 @@
+use super::{enums::LogicalOperator, tables::SqlTableField, values::SqlValue};
+
 pub enum SqlFilter {
     Logical(SqlLogicalFilter),
     Conditional(SqlConditionalFilter),
 }
 
+pub enum SqlLogicalFilterValue {
+    Single(SqlValue),
+    List(Vec<SqlValue>),
+}
+
 pub struct SqlLogicalFilter {
     pub field: SqlTableField,
     pub operator: LogicalOperator,
-    pub values: Vec<SqlValue>,
+    pub value: SqlLogicalFilterValue,
 }
 
 impl SqlLogicalFilter {
-    pub fn new(field: SqlTableField, operator: LogicalOperator, values: Vec<SqlValue>) -> Self {
+    pub fn new(
+        field: SqlTableField,
+        operator: LogicalOperator,
+        value: SqlLogicalFilterValue,
+    ) -> Self {
         SqlLogicalFilter {
             field,
             operator,
-            values,
+            value,
         }
     }
-
     pub fn generate_sql(&self) -> (String, Vec<SqlValue>) {
-        let operator_sql = match self.operator {
-            LogicalOperator::Equal => "=",
-            LogicalOperator::NotEqual => "!=",
-            LogicalOperator::LessThan => "<",
-            // Other operators...
-            _ => panic!("Unsupported operator"),
+        let field = match &self.field.table_name {
+            Some(table_name) => format!("{}.{}", table_name, self.field.field_name),
+            None => self.field.field_name.clone(),
         };
-        let field_name = self.field.full_name();
-        let sql = format!("{} {} ?", field_name, operator_sql);
-        (sql, self.values.clone())
+        let operator = format!("{}", self.operator);
+
+        match (&self.operator, &self.value) {
+            (LogicalOperator::In | LogicalOperator::NotIn, SqlLogicalFilterValue::List(values)) => {
+                let placeholders = values
+                    .iter()
+                    .map(|_| "?".to_string())
+                    .collect::<Vec<String>>()
+                    .join(",");
+                let sql = format!("{} {} ({})", field, operator, placeholders);
+                (sql, values.clone())
+            }
+            (
+                LogicalOperator::Between | LogicalOperator::NotBetween,
+                SqlLogicalFilterValue::List(values),
+            ) if values.len() == 2 => {
+                let sql = format!("{} {} ? AND ?", field, operator);
+                (sql, vec![values[0].clone(), values[1].clone()])
+            }
+            (LogicalOperator::IsNull | LogicalOperator::IsNotNull, _) => {
+                let sql = format!("{} {}", field, operator);
+                (sql, vec![])
+            }
+            (
+                LogicalOperator::Contains
+                | LogicalOperator::NotContains
+                | LogicalOperator::ContainsCaseSensitive
+                | LogicalOperator::NotContainsCaseSensitive,
+                SqlLogicalFilterValue::Single(value),
+            ) => {
+                let sql = format!("{} {} ?", field, operator);
+                let param = match value {
+                    SqlValue::String(s) => SqlValue::String(format!("%{}%", s)),
+                    _ => panic!("Expected a String value for LIKE operator"),
+                };
+                (sql, vec![param])
+            }
+            (
+                LogicalOperator::StartsWith
+                | LogicalOperator::NotStartsWith
+                | LogicalOperator::StartsWithCaseSensitive
+                | LogicalOperator::NotStartsWithCaseSensitive,
+                SqlLogicalFilterValue::Single(value),
+            ) => {
+                let sql = format!("{} {} ?", field, operator);
+                let param = match value {
+                    SqlValue::String(s) => SqlValue::String(format!("{}%", s)),
+                    _ => panic!("Expected a String value for LIKE operator"),
+                };
+                (sql, vec![param])
+            }
+            (
+                LogicalOperator::EndsWith
+                | LogicalOperator::NotEndsWith
+                | LogicalOperator::EndsWithCaseSensitive
+                | LogicalOperator::NotEndsWithCaseSensitive,
+                SqlLogicalFilterValue::Single(value),
+            ) => {
+                let sql = format!("{} {} ?", field, operator);
+                let param = match value {
+                    SqlValue::String(s) => SqlValue::String(format!("%{}", s)),
+                    _ => panic!("Expected a String value for LIKE operator"),
+                };
+                (sql, vec![param])
+            }
+            (_, SqlLogicalFilterValue::Single(value)) => {
+                let sql = format!("{} {} ?", field, operator);
+                (sql, vec![value.clone()])
+            }
+            _ => panic!(
+                "Operator {} not implemented or invalid value type",
+                operator
+            ),
+        }
     }
 }
 

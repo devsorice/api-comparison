@@ -25,7 +25,7 @@ impl SqlTableField {
 
     pub fn full_name(&self) -> String {
         match &self.table_name {
-            Some(name) => format!("{}.{}", name, self.field_name),
+            Some(name) => format!("`{}`.`{}`", name, self.field_name),
             None => self.field_name.clone(),
         }
     }
