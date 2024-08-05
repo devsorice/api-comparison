@@ -8,6 +8,7 @@ use serde_json::Value;
 use sqlx::Row;
 use sqlx::{postgres::PgRow, query::Query, PgPool, Postgres};
 use std::marker::PhantomData;
+use super::sql::{SqlWhere, SqlLimit, SqlOffset, SqlOrderBy, SqlProjection}
 
 #[async_trait]
 pub trait CrudModel: Serialize + for<'de> Deserialize<'de> + Send + Sync + Unpin + 'static {
@@ -111,7 +112,28 @@ impl<T: CrudModel> CrudService<T> {
         Ok(Json(ids))
     }
 
-    pub async fn list(&self) -> Result<Json<Vec<T>>, AppError> {
+    pub async fn count(&self, filter ) -> Result<Json<Vec<T>>, AppError> {
+      let query = format!(
+          "SELECT {} FROM {}",
+          T::list_fields().join(", "),
+          T::table_name()
+      );
+      info!("Executing query: {}", &query);
+
+      let rows = sqlx::query(&query)
+          .fetch_all(&self.pool)
+          .await
+          .map_err(AppError::DatabaseError)?;
+
+      let models: Vec<T> = rows
+          .into_iter()
+          .map(|row| T::from_row(&row))
+          .collect::<Result<Vec<T>, AppError>>()?;
+
+      Ok(Json(models))
+  }
+
+    pub async fn list(&self, projection, filter, sort, limit, page ) -> Result<Json<Vec<T>>, AppError> {
         let query = format!(
             "SELECT {} FROM {}",
             T::list_fields().join(", "),
@@ -131,6 +153,9 @@ impl<T: CrudModel> CrudService<T> {
 
         Ok(Json(models))
     }
+
+    delete_by_filter
+    update_by_filter
 
     pub async fn delete(&self, id: i32) -> Result<StatusCode, StatusCode> {
         let query = format!(
