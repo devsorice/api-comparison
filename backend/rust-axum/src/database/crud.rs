@@ -154,8 +154,28 @@ impl<T: CrudModel> CrudService<T> {
         Ok(Json(models))
     }
 
-    delete_by_filter
-    update_by_filter
+    pub async fn delete_by_filter(&self, filter: String) -> Result<(), AppError> {
+      let query = format!("DELETE FROM {} WHERE {}", T::table_name(), filter);
+        sqlx::query(&query)
+            .execute(&self.pool)
+            .await
+            .map_err(AppError::DatabaseError)?;
+        Ok(())
+    }
+
+    pub async fn update_by_filter(&self, updates: HashMap<String, String>, filter: String) -> Result<(), AppError> {
+        let updates_str = updates.into_iter()
+            .map(|(key, value)| format!("{} = '{}'", key, value))
+            .collect::<Vec<String>>()
+            .join(", ");
+
+        let query = format!("UPDATE {} SET {} WHERE {}", T::table_name(), updates_str, filter);
+        sqlx::query(&query)
+            .execute(&self.pool)
+            .await
+            .map_err(AppError::DatabaseError)?;
+        Ok(())
+    }
 
     pub async fn delete(&self, id: i32) -> Result<StatusCode, StatusCode> {
         let query = format!(
