@@ -1,10 +1,11 @@
 use std::collections::HashMap;
 
-use super::{components::*, errors::*, filters::*, statements::*, tables::*, values::*};
+use super::{components::*, enums::*, errors::*, filters::*, statements::*, tables::*, values::*};
 
 #[derive(Debug, Clone)]
 pub struct SimpleFilter {
     pub field: String,
+    pub table: String,
     pub operator: String,
     pub value: SqlValue,
 }
@@ -78,7 +79,7 @@ pub struct DeleteParams {
     pub where_clause: Option<HashMap<String, Filter>>,
 }
 
-struct SQLQueryBuilder;
+pub struct SQLQueryBuilder;
 
 impl SQLQueryBuilder {
     pub fn build_filter(filter_params: &Filter) -> Result<SqlFilter, SqlError> {
@@ -101,7 +102,7 @@ impl SQLQueryBuilder {
                     }
                 };
                 Ok(SqlFilter::Logical(SqlLogicalFilter {
-                    field: simple.field.clone(),
+                    field: SqlTableField::new(simple, None);,
                     operator: logical_operator,
                     value: sql_value,
                 }))

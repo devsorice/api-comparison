@@ -4,6 +4,14 @@ pub enum SqlFilter {
     Logical(SqlLogicalFilter),
     Conditional(SqlConditionalFilter),
 }
+impl SqlFilter {
+    pub fn generate_sql(&self) -> (String, Vec<SqlValue>) {
+        match self {
+            SqlFilter::Logical(logical_filter) => logical_filter.generate_sql(),
+            SqlFilter::Conditional(conditional_filter) => conditional_filter.generate_sql(),
+        }
+    }
+}
 
 pub enum SqlLogicalFilterValue {
     Single(SqlValue),
@@ -33,7 +41,7 @@ impl SqlLogicalFilter {
             Some(table_name) => format!("{}.{}", table_name, self.field.field_name),
             None => self.field.field_name.clone(),
         };
-        let operator = format!("{}", self.operator);
+        let operator = format!("{}", self.operator.to_sql());
 
         match (&self.operator, &self.value) {
             (LogicalOperator::In | LogicalOperator::NotIn, SqlLogicalFilterValue::List(values)) => {

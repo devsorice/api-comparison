@@ -49,29 +49,29 @@ pub enum SqlJoinType {
 impl SqlJoinType {
     pub fn from_str(val: &str) -> Option<Self> {
         match val.to_uppercase().as_str() {
-            "INNER JOIN" => Some(Self::InnerJoin),
-            "LEFT JOIN" => Some(Self::LeftJoin),
-            "RIGHT JOIN" => Some(Self::RightJoin),
-            "FULL JOIN" => Some(Self::FullJoin),
-            "CROSS JOIN" => Some(Self::CrossJoin),
-            "NATURAL JOIN" => Some(Self::NaturalJoin),
-            "LEFT OUTER JOIN" => Some(Self::LeftOuterJoin),
-            "RIGHT OUTER JOIN" => Some(Self::RightOuterJoin),
-            "FULL OUTER JOIN" => Some(Self::FullOuterJoin),
+            "INNER" => Some(Self::InnerJoin),
+            "LEFT" => Some(Self::LeftJoin),
+            "RIGHT" => Some(Self::RightJoin),
+            "FULL" => Some(Self::FullJoin),
+            "CROSS" => Some(Self::CrossJoin),
+            "NATURAL" => Some(Self::NaturalJoin),
+            "LEFT OUTER" => Some(Self::LeftOuterJoin),
+            "RIGHT OUTER" => Some(Self::RightOuterJoin),
+            "FULL OUTER" => Some(Self::FullOuterJoin),
             _ => None,
         }
     }
     pub fn to_string(&self) -> &str {
         match self {
-            Self::InnerJoin => "INNER JOIN",
-            Self::LeftJoin => "LEFT JOIN",
-            Self::RightJoin => "RIGHT JOIN",
-            Self::FullJoin => "FULL JOIN",
-            Self::CrossJoin => "CROSS JOIN",
-            Self::NaturalJoin => "NATURAL JOIN",
-            Self::LeftOuterJoin => "LEFT OUTER JOIN",
-            Self::RightOuterJoin => "RIGHT OUTER JOIN",
-            Self::FullOuterJoin => "FULL OUTER JOIN",
+            Self::InnerJoin => "INNER",
+            Self::LeftJoin => "LEFT",
+            Self::RightJoin => "RIGHT",
+            Self::FullJoin => "FULL",
+            Self::CrossJoin => "CROSS",
+            Self::NaturalJoin => "NATURAL",
+            Self::LeftOuterJoin => "LEFT OUTER",
+            Self::RightOuterJoin => "RIGHT OUTER",
+            Self::FullOuterJoin => "FULL OUTER",
             _ => "",
         }
     }

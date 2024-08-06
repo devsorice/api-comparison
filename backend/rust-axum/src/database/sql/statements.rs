@@ -43,7 +43,7 @@ impl SelectStatement {
         }
     }
 
-    fn generate_query(&self) -> (String, Vec<SqlValue>) {
+    pub fn generate_query(&self) -> (String, Vec<SqlValue>) {
         let mut query = String::from("SELECT ");
         let mut params = Vec::new();
 
@@ -53,7 +53,7 @@ impl SelectStatement {
 
         match &self.projection {
             Some(proj) => {
-                let (proj_sql, _) = proj.generate_sql(); // Assuming no values needed for projection
+                let proj_sql = proj.generate_sql(); // Assuming no values needed for projection
                 query.push_str(&proj_sql);
             }
             None => query.push_str("*"),
@@ -61,10 +61,13 @@ impl SelectStatement {
 
         query.push_str(&format!(" FROM `{}`", self.from_table.name));
 
-        for join in &self.joins {
-            let (join_sql, join_values) = join.generate_sql();
-            query.push_str(&format!(" {}", join_sql));
-            params.extend(join_values);
+        // Handle joins
+        if let Some(joins) = &self.joins {
+            for join in joins {
+                let (join_sql, join_values) = join.generate_sql();
+                query.push_str(&format!(" {}", join_sql));
+                params.extend(join_values);
+            }
         }
 
         if let Some(where_clause) = &self.where_clause {

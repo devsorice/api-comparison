@@ -30,6 +30,30 @@ impl SqlProjection {
     pub fn new(projection: Vec<SqlProjectionItem>) -> Self {
         SqlProjection { projection }
     }
+    pub fn generate_sql(&self) -> String {
+        let projection_parts: Vec<String> = self
+            .projection
+            .iter()
+            .map(|item| {
+                match item {
+                    SqlProjectionItem::TableField(field) => {
+                        // If the field has a table name, prefix it, otherwise just use field name
+                        field.full_name()
+                    }
+                    SqlProjectionItem::Aggregation(aggregation) => {
+                        // Generate SQL for an aggregation function, e.g., "SUM(table.field)"
+                        format!(
+                            "{}({})",
+                            aggregation.aggregation.to_string(),
+                            aggregation.field.full_name()
+                        )
+                    }
+                }
+            })
+            .collect();
+
+        projection_parts.join(", ")
+    }
 }
 
 /***WHERE CLAUSE***/
@@ -76,19 +100,11 @@ impl SqlJoin {
 
     pub fn generate_sql(&self) -> (String, Vec<SqlValue>) {
         let base_sql = format!(
-            "{} JOIN {} ON {}.{} = {}.{}",
+            "{} JOIN {} ON {} = {}",
             self.join_type.to_string(),
             self.table.name,
-            self.left_field
-                .table_name
-                .as_ref()
-                .unwrap_or(&String::new()),
-            self.left_field.field_name,
-            self.right_field
-                .table_name
-                .as_ref()
-                .unwrap_or(&String::new()),
-            self.right_field.field_name
+            self.left_field.full_name(),
+            self.right_field.full_name()
         );
         match &self.sql_filter {
             Some(filter) => {

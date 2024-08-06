@@ -8,7 +8,9 @@ use serde_json::Value;
 use sqlx::Row;
 use sqlx::{postgres::PgRow, query::Query, PgPool, Postgres};
 use std::marker::PhantomData;
-use super::sql::{SqlWhere, SqlLimit, SqlOffset, SqlOrderBy, SqlProjection}
+use std::collections::HashMap;
+use crate::database::sql::query_builder::*;
+use crate::database::sql::values::*;
 
 #[async_trait]
 pub trait CrudModel: Serialize + for<'de> Deserialize<'de> + Send + Sync + Unpin + 'static {
@@ -112,28 +114,50 @@ impl<T: CrudModel> CrudService<T> {
         Ok(Json(ids))
     }
 
-    pub async fn count(&self, filter ) -> Result<Json<Vec<T>>, AppError> {
-      let query = format!(
-          "SELECT {} FROM {}",
-          T::list_fields().join(", "),
-          T::table_name()
-      );
-      info!("Executing query: {}", &query);
+    pub async fn count(&self, filter: Option<HashMap<String, Filter>>) -> Result<i64, AppError> {
+      let aggregated_projection = ProjectionField::Aggregated {
+        field: "*".to_string(),
+        aggregation: Some("COUNT".to_string()),
+        table:None
+      };
+      let params = SelectParams {
+          from_table: T::table_name().to_string(),
+          projection: Some(vec![aggregated_projection]),
+          where_clause: filter,
+          join: None,
+          groupby: None,
+          having: None,
+          orderby: None,
+          limit: None,
+          offset: None,
+          distinct: None,
+      };
 
-      let rows = sqlx::query(&query)
-          .fetch_all(&self.pool)
-          .await
-          .map_err(AppError::DatabaseError)?;
+      let select_statement_result = SQLQueryBuilder::build_select_statement(&params);
 
-      let models: Vec<T> = rows
-          .into_iter()
-          .map(|row| T::from_row(&row))
-          .collect::<Result<Vec<T>, AppError>>()?;
+       // Check if building the select statement was successful
+        match select_statement_result {
+          Ok(select_statement) => {
+              // Assuming there is a to_sql method to convert the statement into a SQL string
+              let query = select_statement.generate_query();
 
-      Ok(Json(models))
+              info!("Executing query: {}", &query);
+
+              let result = sqlx::query_scalar(&query)
+                  .fetch_one(&self.pool)
+                  .await
+                  .map_err(AppError::DatabaseError)?;
+
+              Ok(result)
+          },
+          Err(e) => {
+              // Handle error in building the SQL statement
+              Err(AppError::DatabaseError(format!("Failed to build SQL statement: {}", e)))
+          }
+      }
   }
 
-    pub async fn list(&self, projection, filter, sort, limit, page ) -> Result<Json<Vec<T>>, AppError> {
+    pub async fn list(&self, projection:Option<Vec<ProjectionField>>, filter:Option<HashMap<String, Filter>>, sort:Option<HashMap<String, i32>>, limit:Option<i32>, page:Option<i32>) -> Result<Json<Vec<T>>, AppError> {
         let query = format!(
             "SELECT {} FROM {}",
             T::list_fields().join(", "),
@@ -154,7 +178,7 @@ impl<T: CrudModel> CrudService<T> {
         Ok(Json(models))
     }
 
-    pub async fn delete_by_filter(&self, filter: String) -> Result<(), AppError> {
+    pub async fn delete_by_filter(&self, filter: Option<HashMap<String, Filter>>) -> Result<(), AppError> {
       let query = format!("DELETE FROM {} WHERE {}", T::table_name(), filter);
         sqlx::query(&query)
             .execute(&self.pool)
@@ -163,7 +187,7 @@ impl<T: CrudModel> CrudService<T> {
         Ok(())
     }
 
-    pub async fn update_by_filter(&self, updates: HashMap<String, String>, filter: String) -> Result<(), AppError> {
+    pub async fn update_by_filter(&self, updates: HashMap<String, SqlValue>, filter: Option<HashMap<String, Filter>>) -> Result<(), AppError> {
         let updates_str = updates.into_iter()
             .map(|(key, value)| format!("{} = '{}'", key, value))
             .collect::<Vec<String>>()
