@@ -7,7 +7,7 @@ pub struct SelectStatement {
     from_table: SqlTable,
     projection: Option<SqlProjection>,
     where_clause: Option<SqlWhere>,
-    joins: Vec<SqlJoin>,
+    joins: Option<Vec<SqlJoin>>,
     group_by: Option<SqlGroupBy>,
     having: Option<SqlHaving>,
     order_by: Option<SqlOrderBy>,
@@ -21,7 +21,7 @@ impl SelectStatement {
         from_table: SqlTable,
         projection: Option<SqlProjection>,
         where_clause: Option<SqlWhere>,
-        joins: Vec<SqlJoin>,
+        joins: Option<Vec<SqlJoin>>,
         group_by: Option<SqlGroupBy>,
         having: Option<SqlHaving>,
         order_by: Option<SqlOrderBy>,
@@ -59,7 +59,7 @@ impl SelectStatement {
             None => query.push_str("*"),
         }
 
-        query.push_str(&format!(" FROM {}", self.from_table.name));
+        query.push_str(&format!(" FROM `{}`", self.from_table.name));
 
         for join in &self.joins {
             let (join_sql, join_values) = join.generate_sql();
@@ -128,7 +128,7 @@ impl InsertStatement {
             .collect::<Vec<_>>()
             .join(", ");
         let query = format!(
-            "INSERT INTO {} ({}) VALUES ({})",
+            "INSERT INTO `{}` ({}) VALUES ({})",
             self.into_table.name, field_names, placeholders
         );
 
@@ -162,7 +162,7 @@ impl UpdateStatement {
             .map(|(field, _)| format!("{} = ?", field.full_name()))
             .collect::<Vec<_>>()
             .join(", ");
-        let mut query = format!("UPDATE {} SET {}", self.table.name, update_parts);
+        let mut query = format!("UPDATE `{}` SET {}", self.table.name, update_parts);
         let mut values = self
             .updates
             .iter()
@@ -193,7 +193,7 @@ impl DeleteStatement {
     }
 
     pub fn generate_query(&self) -> (String, Vec<SqlValue>) {
-        let mut query = format!("DELETE FROM {}", self.from_table.name);
+        let mut query = format!("DELETE FROM `{}`", self.from_table.name);
         let mut values = Vec::new();
 
         if let Some(where_clause) = &self.where_clause {
