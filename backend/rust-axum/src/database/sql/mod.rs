@@ -1,5 +1,6 @@
 pub mod components;
 pub mod enums;
+pub mod errors;
 pub mod filters;
 pub mod query_builder;
 pub mod statements;

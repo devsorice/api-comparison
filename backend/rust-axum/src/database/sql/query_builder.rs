@@ -1,6 +1,26 @@
 use std::collections::HashMap;
 
-use super::{components::*, filters::*, statements::*, tables::*, values::*};
+use super::{components::*, errors::*, filters::*, statements::*, tables::*, values::*};
+
+#[derive(Debug, Clone)]
+pub struct SimpleFilter {
+    pub field: String,
+    pub operator: String,
+    pub value: SqlValue,
+}
+
+#[derive(Debug, Clone)]
+pub struct ConditionalFilter {
+    pub operator: String,
+    pub filters: Vec<Filter>,
+}
+
+#[derive(Debug, Clone)]
+pub enum Filter {
+    Simple(SimpleFilter),
+    Conditional(ConditionalFilter),
+    Map(HashMap<String, Filter>),
+}
 
 // Define enum to handle both simple and aggregated fields
 #[derive(Debug, Clone)]
@@ -14,19 +34,29 @@ pub enum ProjectionField {
     },
 }
 
+#[derive(Debug, Clone)]
+pub enum Field {
+    Simple(String), // Simple field name
+    WithTableName {
+        // Aggregated field with optional table and aggregation function
+        field: String,
+        table: Option<String>,
+    },
+}
+
 // Structs for different SQL parameters
 #[derive(Debug, Clone)]
 pub struct SelectParams {
-    pub from_table: SqlTable,
-    pub projection: Option<SqlProjection>,
-    pub where_clause: Option<SqlWhere>,
-    pub join: Option<SqlJoin>, // Simplified for example
-    pub groupby: Option<SqlGroupBy>,
-    pub having: Option<SqlHaving>,
-    pub orderby: Option<SqlOrderBy>,
-    pub limit: Option<SqlLimit>,
-    pub offset: Option<SqlOffset>,
-    pub distinct: Option<SqlDistinct>,
+    pub from_table: String,
+    pub projection: Option<Vec<ProjectionField>>,
+    pub where_clause: Option<HashMap<String, Filter>>,
+    pub join: Option<Vec<HashMap<String, String>>>,
+    pub groupby: Option<Vec<Field>>,
+    pub having: Option<HashMap<String, Filter>>,
+    pub orderby: Option<HashMap<String, i32>>,
+    pub limit: Option<i32>,
+    pub offset: Option<i32>,
+    pub distinct: Option<bool>,
 }
 
 #[derive(Debug, Clone)]
@@ -39,142 +69,172 @@ pub struct InsertParams {
 pub struct UpdateParams {
     pub table: String,
     pub updates: HashMap<String, SqlValue>,
-    pub where_clause: Option<SqlWhere>,
+    pub where_clause: Option<HashMap<String, Filter>>,
 }
 
 #[derive(Debug, Clone)]
 pub struct DeleteParams {
     pub from_table: String,
-    pub where_clause: Option<SqlWhere>,
+    pub where_clause: Option<HashMap<String, Filter>>,
 }
 
 struct SQLQueryBuilder;
 
 impl SQLQueryBuilder {
-    pub fn build_filter(
-        filter_params: &Filter,
-        root_filter: bool,
-    ) -> Result<Box<dyn SqlFilter>, SqlError> {
+    pub fn build_filter(filter_params: &Filter) -> Result<SqlFilter, SqlError> {
         match filter_params {
-            Filter::SimpleFilter {
-                field,
-                operator,
-                value,
-            } => {
-                let sql_value = match value {
-                    Value::Text(t) => SqlValue::Text(t.clone()),
-                    Value::Integer(i) => SqlValue::Integer(*i),
-                    Value::Float(f) => SqlValue::Float(*f),
-                    Value::Boolean(b) => SqlValue::Boolean(*b),
-                    Value::None => SqlValue::Null,
+            Filter::Simple(simple) => {
+                let sql_value = match &simple.value {
+                    SqlValue::Str(v) => SqlValue::Str(v.clone()),
+                    SqlValue::Int(v) => SqlValue::Int(*v),
+                    SqlValue::Float(v) => SqlValue::Float(*v),
+                    SqlValue::Bool(v) => SqlValue::Bool(*v),
+                    SqlValue::None => SqlValue::None,
                 };
-                let logical_operator = match operator.as_str() {
+                let logical_operator = match simple.operator.as_str() {
                     "gt" => LogicalOperator::Gt,
                     "eq" => LogicalOperator::Eq,
                     _ => {
                         return Err(SqlError {
-                            message: format!("Unsupported operator {}", operator),
+                            message: format!("Unsupported operator {}", simple.operator),
                         })
                     }
                 };
-                Ok(Box::new(SimpleFilter {
-                    field: field.clone(),
+                Ok(SqlFilter::Logical(SqlLogicalFilter {
+                    field: simple.field.clone(),
                     operator: logical_operator,
                     value: sql_value,
                 }))
             }
-            Filter::ConditionalFilter { operator, filters } => {
-                let op = match operator.as_str() {
+            Filter::Conditional(conditional) => {
+                let op = match conditional.operator.as_str() {
                     "and" => LogicalOperator::And,
                     "or" => LogicalOperator::Or,
                     _ => {
                         return Err(SqlError {
-                            message: format!("Unsupported logical operator {}", operator),
+                            message: format!(
+                                "Unsupported logical operator {}",
+                                conditional.operator
+                            ),
                         })
                     }
                 };
-                let mut constructed_filters: Vec<Box<dyn SqlFilter>> = Vec::new();
-                for filter in filters {
-                    let constructed_filter = Self::build_filter(filter, false)?;
+                let mut constructed_filters: Vec<SqlFilter> = Vec::new();
+                for filter in &conditional.filters {
+                    let constructed_filter = Self::build_filter(filter)?;
                     constructed_filters.push(constructed_filter);
                 }
-                Ok(Box::new(ConditionalFilter {
+                Ok(SqlFilter::Conditional(SqlConditionalFilter {
                     operator: op,
                     filters: constructed_filters,
                 }))
             }
-            _ => Err(SqlError {
+            Filter::Map(_) => Err(SqlError {
                 message: "Invalid filter format".to_string(),
             }),
         }
     }
 
-    pub fn build_select_statement(params: &SelectParams) -> Result<SelectStatement, String> {
+    pub fn build_select_statement(params: &SelectParams) -> Result<SelectStatement, SqlError> {
         let from_table = SqlTable::new(params.from_table.clone());
 
-        let mut projection = Vec::new();
-        for item in &params.projection {
-            match item {
-                ProjectionField::Field(field) => {
-                    projection.push(SqlTableField::new(field.clone(), None));
-                }
-                ProjectionField::Aggregated {
-                    aggregation,
-                    field,
-                    table,
-                } => {
-                    let agg_type = SqlAggregationType::from_str(aggregation)
-                        .map_err(|_| format!("Unsupported aggregation type: {}", aggregation))?;
-                    let table_field = SqlTableField::new(field.clone(), table.clone());
-                    projection.push(SqlAggregation::new(agg_type, table_field));
+        let projection = if let Some(projection_fields) = &params.projection {
+            let mut proj = Vec::new();
+            for item in projection_fields {
+                match item {
+                    ProjectionField::Simple(field) => {
+                        proj.push(SqlProjectionField::new(field.clone(), None));
+                    }
+                    ProjectionField::Aggregated {
+                        field,
+                        table,
+                        aggregation,
+                    } => {
+                        let agg_type = match aggregation.as_deref() {
+                            Some("SUM") => SqlAggregationType::Sum,
+                            Some("AVG") => SqlAggregationType::Avg,
+                            _ => {
+                                return Err(SqlError {
+                                    message: format!(
+                                        "Unsupported aggregation type: {:?}",
+                                        aggregation
+                                    ),
+                                })
+                            }
+                        };
+                        let table_field = SqlTableField::new(field.clone(), table.clone());
+                        proj.push(SqlAggregation::new(agg_type, table_field));
+                    }
                 }
             }
-        }
+            proj
+        } else {
+            Vec::new()
+        };
 
         let where_clause = if let Some(where_params) = &params.where_clause {
-            Some(SQLQueryBuilder::build_filter(where_params)?)
+            let filter = Self::build_filter(where_params.get("filter").unwrap())?;
+            Some(SqlWhere::new(filter))
         } else {
             None
         };
 
-        let mut joins = Vec::new();
-        for join in &params.join {
-            let join_type = SqlJoinType::from_str(&join.join_type)
-                .map_err(|_| format!("Unsupported join type: {}", join.join_type))?;
-            let left_field = SqlTableField::new(join.left_field.clone(), Some(join.table.clone()));
-            let right_field =
-                SqlTableField::new(join.right_field.clone(), Some(join.table.clone()));
-            joins.push(SqlJoin::new(
-                join_type,
-                from_table.clone(),
-                left_field,
-                right_field,
-                None,
-            ));
-        }
-
-        let group_by = match &params.groupby {
-            Some(fields) => {
-                let grouped_fields = fields
-                    .iter()
-                    .map(|f| SqlTableField::new(f.clone(), None))
-                    .collect();
-                Some(SqlGroupBy::new(grouped_fields))
+        let joins = if let Some(join_params) = &params.join {
+            let mut joins_vec = Vec::new();
+            for join in join_params {
+                let join_type = match join.get("type").map(|s| s.as_str()) {
+                    Some("INNER") => SqlJoinType::Inner,
+                    Some("LEFT") => SqlJoinType::Left,
+                    _ => {
+                        return Err(SqlError {
+                            message: "Unsupported join type".to_string(),
+                        })
+                    }
+                };
+                let left_field = SqlTableField::new(join.get("left_field").unwrap().clone(), None);
+                let right_field =
+                    SqlTableField::new(join.get("right_field").unwrap().clone(), None);
+                joins_vec.push(SqlJoin::new(
+                    join_type,
+                    from_table.clone(),
+                    left_field,
+                    right_field,
+                    None,
+                ));
             }
-            None => None,
+            joins_vec
+        } else {
+            Vec::new()
+        };
+
+        let group_by = if let Some(groupby_params) = &params.groupby {
+            let mut grouped_fields = Vec::new();
+            for field in groupby_params {
+                match field {
+                    Field::Simple(f) => grouped_fields.push(SqlTableField::new(f.clone(), None)),
+                    Field::WithTableName { field, table } => {
+                        grouped_fields.push(SqlTableField::new(field.clone(), table.clone()))
+                    }
+                }
+            }
+            Some(SqlGroupBy::new(grouped_fields))
+        } else {
+            None
         };
 
         let having_clause = if let Some(having_params) = &params.having {
-            Some(SQLQueryBuilder::build_filter(having_params)?)
+            let filter = Self::build_filter(having_params.get("filter").unwrap())?;
+            Some(SqlHaving::new(filter))
         } else {
             None
         };
 
-        let order_by = if !params.orderby.is_empty() {
-            let orderings = params
-                .orderby
+        let order_by = if let Some(orderby_params) = &params.orderby {
+            let orderings = orderby_params
                 .iter()
-                .map(|(field, ascending)| (SqlTableField::new(field.clone(), None), *ascending))
+                .map(|(field, ascending)| {
+                    (SqlTableField::new(field.clone(), None), *ascending != 0)
+                })
                 .collect();
             Some(SqlOrderBy::new(orderings))
         } else {
@@ -183,11 +243,11 @@ impl SQLQueryBuilder {
 
         let limit = params.limit.map(SqlLimit::new);
         let offset = params.offset.map(SqlOffset::new);
-        let distinct = params.distinct.then(|| SqlDistinct::new(true));
+        let distinct = params.distinct.unwrap_or(false);
 
         Ok(SelectStatement::new(
             from_table,
-            projection,
+            SqlProjection::new(projection),
             where_clause,
             joins,
             group_by,
@@ -199,57 +259,47 @@ impl SQLQueryBuilder {
         ))
     }
 
-    pub fn build_insert_statement(params: &InsertParams) -> Result<InsertStatement, String> {
+    pub fn build_insert_statement(params: &InsertParams) -> Result<InsertStatement, SqlError> {
         let into_table = SqlTable::new(params.into_table.clone());
-
         let fields: Vec<SqlTableField> = params
             .entity
             .keys()
             .map(|field| SqlTableField::new(field.clone(), None))
             .collect();
-
-        let values: Vec<SqlValue> = params
-            .entity
-            .values()
-            .map(|value| match value {
-                Value::Str(v) => SqlValue::String(v.clone()),
-                Value::Int(v) => SqlValue::Integer(*v),
-                Value::Float(v) => SqlValue::Float(*v),
-                Value::Bool(v) => SqlValue::Boolean(*v),
-                Value::None => SqlValue::Null,
-            })
-            .collect();
-
+        let values: Vec<SqlValue> = params.entity.values().cloned().collect();
         Ok(InsertStatement::new(into_table, fields, values))
     }
 
-    pub fn build_update_statement(params: &UpdateParams) -> Result<UpdateStatement, String> {
+    pub fn build_update_statement(params: &UpdateParams) -> Result<UpdateStatement, SqlError> {
         let table = SqlTable::new(params.table.clone());
         let updates: Vec<SqlUpdatePair> = params
             .updates
             .iter()
             .map(|(field, value)| {
                 let field = SqlTableField::new(field.clone(), None);
-                let value = match value {
-                    Value::Str(v) => SqlValue::String(v.clone()),
-                    Value::Int(v) => SqlValue::Integer(*v),
-                    Value::Float(v) => SqlValue::Float(*v),
-                    Value::Bool(v) => SqlValue::Boolean(*v),
-                    Value::None => SqlValue::Null,
-                };
+                let value = value.clone();
                 SqlUpdatePair::new(field, value)
             })
             .collect();
 
         let where_clause = if let Some(where_params) = &params.where_clause {
-            match SQLQueryBuilder::build_filter(where_params) {
-                Ok(filter) => Some(SqlWhere::new(filter)),
-                Err(e) => return Err(e),
-            }
+            let filter = Self::build_filter(where_params.get("filter").unwrap())?;
+            Some(SqlWhere::new(filter))
         } else {
             None
         };
 
         Ok(UpdateStatement::new(table, updates, where_clause))
+    }
+
+    pub fn build_delete_statement(params: &DeleteParams) -> Result<DeleteStatement, SqlError> {
+        let from_table = SqlTable::new(params.from_table.clone());
+        let where_clause = if let Some(where_params) = &params.where_clause {
+            let filter = Self::build_filter(where_params.get("filter").unwrap())?;
+            Some(SqlWhere::new(filter))
+        } else {
+            None
+        };
+        Ok(DeleteStatement::new(from_table, where_clause))
     }
 }
