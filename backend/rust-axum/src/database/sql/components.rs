@@ -77,11 +77,17 @@ impl SqlJoin {
     pub fn generate_sql(&self) -> (String, Vec<SqlValue>) {
         let base_sql = format!(
             "{} JOIN {} ON {}.{} = {}.{}",
-            self.join_type.to_sql(),
+            self.join_type.to_string(),
             self.table.name,
-            self.left_field.table_name.unwrap_or_default(),
+            self.left_field
+                .table_name
+                .as_ref()
+                .unwrap_or(&String::new()),
             self.left_field.field_name,
-            self.right_field.table_name.unwrap_or_default(),
+            self.right_field
+                .table_name
+                .as_ref()
+                .unwrap_or(&String::new()),
             self.right_field.field_name
         );
         match &self.sql_filter {
