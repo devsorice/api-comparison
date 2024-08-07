@@ -1,9 +1,12 @@
 use crate::database::crud::{CrudModel, CrudService};
 use crate::exceptions::AppError;
 use async_trait::async_trait;
-use axum::{extract::Json, extract::Path, http::StatusCode, response::IntoResponse, Extension};
+use axum::{
+    extract::Json, extract::Path, http::StatusCode, response::IntoResponse, Extension, Query,
+};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use serde_qs::from_str;
 use sqlx::{postgres::PgRow, query::Query, PgPool, Postgres, Row};
 
 #[derive(Serialize, Deserialize)]
@@ -156,7 +159,8 @@ pub async fn create_users_handler(
 
 pub async fn list_users_handler(Extension(pool): Extension<PgPool>) -> impl IntoResponse {
     let service = CrudService::<User>::new(pool);
-    match service.list().await {
+
+    match service.list(None, None, None, None, None).await {
         Ok(users) => (
             StatusCode::OK,
             response("success", false, Some(users), None),
