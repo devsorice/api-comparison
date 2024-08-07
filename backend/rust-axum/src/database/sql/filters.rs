@@ -1,5 +1,10 @@
 use super::{enums::LogicalOperator, tables::SqlTableField, values::SqlValue};
 
+// Define a trait for SQL filtering functionality
+pub trait SqlFilterTrait {
+    fn generate_sql(&self) -> (String, Vec<SqlValue>);
+}
+
 pub enum SqlFilter {
     Logical(SqlLogicalFilter),
     Conditional(SqlConditionalFilter),
@@ -12,10 +17,29 @@ impl SqlFilter {
         }
     }
 }
+// Implement the trait for each variant of SqlFilter
+impl SqlFilterTrait for SqlFilter {
+    fn generate_sql(&self) -> (String, Vec<SqlValue>) {
+        match self {
+            SqlFilter::Logical(logical_filter) => logical_filter.generate_sql(),
+            SqlFilter::Conditional(conditional_filter) => conditional_filter.generate_sql(),
+        }
+    }
+}
 
 pub enum SqlLogicalFilterValue {
     Single(SqlValue),
     List(Vec<SqlValue>),
+}
+
+impl SqlLogicalFilterValue {
+    /// Helper to unwrap a Single SqlValue from a SqlLogicalFilterValue
+    pub fn into_single(self) -> Result<SqlValue, String> {
+        match self {
+            SqlLogicalFilterValue::Single(val) => Ok(val),
+            _ => Err("Expected a single value".to_string()),
+        }
+    }
 }
 
 pub struct SqlLogicalFilter {
@@ -143,5 +167,17 @@ impl SqlConditionalFilter {
 
         let joined_sql = sql_parts.join(format!(" {} ", self.operator.to_sql()).as_str());
         (joined_sql, values)
+    }
+}
+
+impl SqlFilterTrait for SqlLogicalFilter {
+    fn generate_sql(&self) -> (String, Vec<SqlValue>) {
+        // your existing implementation here
+    }
+}
+
+impl SqlFilterTrait for SqlConditionalFilter {
+    fn generate_sql(&self) -> (String, Vec<SqlValue>) {
+        // your existing implementation here
     }
 }
