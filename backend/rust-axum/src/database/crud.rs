@@ -1,5 +1,6 @@
+use crate::database::sql::enums::DatabaseType;
 use crate::database::sql::query_builder::*;
-use crate::database::sql::values::*;
+use crate::database::sql::statements::DatabaseArguments;
 use crate::exceptions::AppError;
 use async_trait::async_trait;
 use axum::http::StatusCode;
@@ -7,6 +8,7 @@ use axum::Json;
 use log::info;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use sqlx::postgres::PgArguments;
 use sqlx::Row;
 use sqlx::{postgres::PgRow, query::Query, PgPool, Postgres};
 use std::collections::HashMap;
@@ -159,30 +161,78 @@ impl<T: CrudModel> CrudService<T> {
 
     pub async fn list(
         &self,
-        projection: Option<Vec<SqlProjectionField>>,
+        projection: Option<Vec<String>>,
         filter: Option<HashMap<String, FilterInput>>,
-        sort: Option<HashMap<String, i32>>,
-        limit: Option<i32>,
-        page: Option<i32>,
+        sort: Option<HashMap<String, String>>,
+        limit: Option<u64>,
+        page: Option<u64>,
     ) -> Result<Json<Vec<T>>, AppError> {
-        let query = format!(
-            "SELECT {} FROM {}",
-            T::list_fields().join(", "),
-            T::table_name()
+        let table = T::table_name();
+        let projection: Vec<String> = projection.unwrap_or_else(|| {
+            T::list_fields()
+                .iter()
+                .map(|&field| field.to_string())
+                .collect()
+        });
+        let limit = limit.unwrap_or(3);
+        let offset = page.map_or(0, |p| (p - 1) * limit);
+        println!(
+            "Executing list query from table  {:?} with projection: {:?}",
+            table, projection
         );
-        info!("Executing query: {}", &query);
+        println!("with filter: {:?}", filter);
+        println!("with sort: {:?}", sort);
+        println!("with limit: {:?}", limit);
+        println!("with page: {:?}", page);
 
-        let rows = sqlx::query(&query)
-            .fetch_all(&self.pool)
-            .await
-            .map_err(AppError::DatabaseError)?;
+        let params: SelectParams = SelectParams {
+            from_table: table.to_string(),
+            projection: None,
+            where_clause: None,
+            join: None,
+            groupby: None,
+            having: None,
+            orderby: None,
+            limit: Some(limit),
+            offset: Some(offset),
+            distinct: Some(false),
+        };
 
-        let models: Vec<T> = rows
-            .into_iter()
-            .map(|row| T::from_row(&row))
-            .collect::<Result<Vec<T>, AppError>>()?;
+        let statement: Result<
+            crate::database::sql::statements::SelectStatement,
+            crate::database::sql::errors::SqlError,
+        > = SQLQueryBuilder::build_select_statement(&params);
+        match statement {
+            Ok(select_statement) => {
+                let db_type = DatabaseType::PostgreSQL; // Change to DatabaseType::MySQL for MySQL
+                let (query, args) = select_statement.generate_query(db_type);
+                info!("Executing query: {}", query);
+                // Extract PgArguments from DatabaseArguments
+                let pg_args = match args {
+                    DatabaseArguments::Postgres(pg_args) => pg_args,
+                    _ => {
+                        return Err(AppError::DatabaseError(sqlx::Error::Configuration(
+                            "Expected Postgres arguments".into(),
+                        )))
+                    }
+                };
 
-        Ok(Json(models))
+                let rows = sqlx::query_with(&query, pg_args)
+                    .fetch_all(&self.pool)
+                    .await
+                    .map_err(AppError::DatabaseError)?;
+
+                let models: Vec<T> = rows
+                    .into_iter()
+                    .map(|row| T::from_row(&row))
+                    .collect::<Result<Vec<T>, AppError>>()?;
+
+                Ok(Json(models))
+            }
+            Err(e) => Err(AppError::QueryBuildingError(
+                "Failed to build query".to_string(),
+            )),
+        }
     }
 
     // pub async fn delete_by_filter(

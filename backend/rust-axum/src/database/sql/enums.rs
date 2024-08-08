@@ -1,4 +1,9 @@
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+
+pub enum DatabaseType {
+    MySQL,
+    PostgreSQL,
+}
 pub enum SqlAggregationType {
     Sum,
     Avg,

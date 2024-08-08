@@ -8,6 +8,8 @@ pub enum AppError {
     DatabaseError(#[from] sqlx::Error),
     #[error("Deserialization error -> {0}")]
     DeserializationError(String),
+    #[error("QueryBuilding error -> {0}")]
+    QueryBuildingError(String),
 }
 
 impl IntoResponse for AppError {

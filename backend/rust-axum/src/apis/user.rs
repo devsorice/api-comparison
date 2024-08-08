@@ -1,12 +1,15 @@
+use std::collections::HashMap;
+
 use crate::database::crud::{CrudModel, CrudService};
 use crate::exceptions::AppError;
 use async_trait::async_trait;
 use axum::{
-    extract::Json, extract::Path, http::StatusCode, response::IntoResponse, Extension, Query,
+    extract::Json, extract::Path, extract::RawQuery, http::StatusCode, response::IntoResponse,
+    Extension,
 };
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use serde_qs::from_str;
+use serde_qs::from_str as parse_qs;
 use sqlx::{postgres::PgRow, query::Query, PgPool, Postgres, Row};
 
 #[derive(Serialize, Deserialize)]
@@ -157,10 +160,44 @@ pub async fn create_users_handler(
     }
 }
 
-pub async fn list_users_handler(Extension(pool): Extension<PgPool>) -> impl IntoResponse {
+pub async fn list_users_handler(
+    RawQuery(query): RawQuery,
+    Extension(pool): Extension<PgPool>,
+) -> impl IntoResponse {
     let service = CrudService::<User>::new(pool);
 
-    match service.list(None, None, None, None, None).await {
+    let mut projection: Option<Vec<String>> = None;
+    let mut filter: Option<HashMap<String, String>> = None;
+    let mut sort: Option<HashMap<String, String>> = None;
+    let mut limit: u64 = 10;
+    let mut page: u64 = 1;
+
+    // Provide a default empty query if none is provided
+    let query_str = query.unwrap_or_default();
+    let rec_query: Result<super::ListPageQuery, _> = parse_qs(&query_str);
+
+    match rec_query {
+        Ok(query) => {
+            // Handle the success case
+            // query is of type super::ListPageQuery
+            println!("Parsed query: {:?}", query);
+            if let Some(l) = query.limit {
+                limit = l;
+            }
+            if let Some(p) = query.page {
+                page = p;
+            }
+        }
+        Err(e) => {
+            // Handle the error case
+            println!("Failed to parse query: {:?}", e);
+        }
+    }
+
+    match service
+        .list(projection, None, sort, Some(limit), Some(page))
+        .await
+    {
         Ok(users) => (
             StatusCode::OK,
             response("success", false, Some(users), None),

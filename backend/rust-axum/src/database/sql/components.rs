@@ -183,11 +183,11 @@ impl SqlOrderBy {
 
 /*LIMIT CLAUSE */
 pub struct SqlLimit {
-    limit: i32,
+    limit: u64,
 }
 
 impl SqlLimit {
-    pub fn new(limit: i32) -> Self {
+    pub fn new(limit: u64) -> Self {
         SqlLimit { limit }
     }
 
@@ -198,11 +198,11 @@ impl SqlLimit {
 
 /*OFFSET CLAUSE */
 pub struct SqlOffset {
-    offset: i32,
+    offset: u64,
 }
 
 impl SqlOffset {
-    pub fn new(offset: i32) -> Self {
+    pub fn new(offset: u64) -> Self {
         SqlOffset { offset }
     }
 
@@ -219,6 +219,13 @@ pub struct SqlDistinct {
 impl SqlDistinct {
     pub fn new(distinct: bool) -> Self {
         SqlDistinct { distinct }
+    }
+    pub fn generate_sql(&self) -> String {
+        if self.distinct {
+            "DISTINCT".to_string()
+        } else {
+            "".to_string()
+        }
     }
 }
 

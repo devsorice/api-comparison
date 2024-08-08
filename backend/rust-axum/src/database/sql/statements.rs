@@ -1,6 +1,31 @@
-use super::{components::*, tables::*, values::*};
+use sqlx::{mysql::MySqlArguments, postgres::PgArguments, Arguments};
+
+use super::{components::*, converters::*, enums::DatabaseType, tables::*, values::*};
+
 pub trait SqlStatement {
     fn generate_query(&self) -> (String, Vec<SqlValue>);
+}
+
+pub enum DatabaseArguments {
+    Postgres(PgArguments),
+    MySql(MySqlArguments),
+}
+impl DatabaseArguments {
+    pub fn as_postgres(self) -> Option<PgArguments> {
+        if let DatabaseArguments::Postgres(args) = self {
+            Some(args)
+        } else {
+            None
+        }
+    }
+
+    pub fn as_mysql(self) -> Option<MySqlArguments> {
+        if let DatabaseArguments::MySql(args) = self {
+            Some(args)
+        } else {
+            None
+        }
+    }
 }
 
 pub struct SelectStatement {
@@ -11,9 +36,9 @@ pub struct SelectStatement {
     group_by: Option<SqlGroupBy>,
     having: Option<SqlHaving>,
     order_by: Option<SqlOrderBy>,
-    limit: Option<u32>,
-    offset: Option<u32>,
-    distinct: bool,
+    limit: Option<SqlLimit>,
+    offset: Option<SqlOffset>,
+    distinct: Option<SqlDistinct>,
 }
 
 impl SelectStatement {
@@ -25,9 +50,9 @@ impl SelectStatement {
         group_by: Option<SqlGroupBy>,
         having: Option<SqlHaving>,
         order_by: Option<SqlOrderBy>,
-        limit: Option<u32>,
-        offset: Option<u32>,
-        distinct: bool,
+        limit: Option<SqlLimit>,
+        offset: Option<SqlOffset>,
+        distinct: Option<SqlDistinct>,
     ) -> Self {
         SelectStatement {
             from_table,
@@ -43,12 +68,16 @@ impl SelectStatement {
         }
     }
 
-    pub fn generate_query(&self) -> (String, Vec<SqlValue>) {
+    pub fn generate_query(&self, db_type: DatabaseType) -> (String, DatabaseArguments) {
         let mut query = String::from("SELECT ");
         let mut params = Vec::new();
+        let quote_char = match db_type {
+            DatabaseType::MySQL => '`',
+            DatabaseType::PostgreSQL => '"',
+        };
 
-        if self.distinct {
-            query.push_str("DISTINCT ");
+        if let Some(distinct) = &self.distinct {
+            query.push_str(&distinct.generate_sql());
         }
 
         match &self.projection {
@@ -56,10 +85,13 @@ impl SelectStatement {
                 let proj_sql = proj.generate_sql(); // Assuming no values needed for projection
                 query.push_str(&proj_sql);
             }
-            None => query.push_str("*"),
+            None => query.push('*'),
         }
 
-        query.push_str(&format!(" FROM `{}`", self.from_table.name));
+        query.push_str(&format!(
+            " FROM {}{}{}",
+            quote_char, self.from_table.name, quote_char
+        ));
 
         // Handle joins
         if let Some(joins) = &self.joins {
@@ -90,15 +122,20 @@ impl SelectStatement {
             query.push_str(&format!(" {}", order_by.generate_sql()));
         }
 
-        if let Some(limit) = self.limit {
-            query.push_str(&format!(" LIMIT {}", limit));
+        if let Some(limit) = &self.limit {
+            query.push_str(&format!(" {}", limit.generate_sql()));
         }
 
-        if let Some(offset) = self.offset {
-            query.push_str(&format!(" OFFSET {}", offset));
+        if let Some(offset) = &self.offset {
+            query.push_str(&format!(" {}", offset.generate_sql()));
         }
 
-        (query, params)
+        let args = match db_type {
+            DatabaseType::MySQL => DatabaseArguments::MySql(MySqlArguments::convert(params)),
+            DatabaseType::PostgreSQL => DatabaseArguments::Postgres(PgArguments::convert(params)),
+        };
+
+        (query, args)
     }
 }
 
