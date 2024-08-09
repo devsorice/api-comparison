@@ -162,7 +162,7 @@ impl<T: CrudModel> CrudService<T> {
     pub async fn list(
         &self,
         projection: Option<Vec<String>>,
-        filter: Option<HashMap<String, FilterInput>>,
+        filter: Option<FilterInput>,
         sort: Option<HashMap<String, String>>,
         limit: Option<u64>,
         page: Option<u64>,

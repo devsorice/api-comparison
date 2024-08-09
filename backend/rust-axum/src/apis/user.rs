@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use crate::database::crud::{CrudModel, CrudService};
+use crate::database::sql::query_builder::FilterInput;
 use crate::exceptions::AppError;
 use async_trait::async_trait;
 use axum::{
@@ -11,6 +12,8 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 use serde_qs::from_str as parse_qs;
 use sqlx::{postgres::PgRow, query::Query, PgPool, Postgres, Row};
+
+use super::utils::query_string_parser::QueryStringParser;
 
 #[derive(Serialize, Deserialize)]
 pub struct User {
@@ -176,6 +179,8 @@ pub async fn list_users_handler(
     let query_str = query.unwrap_or_default();
     let rec_query: Result<super::ListPageQuery, _> = parse_qs(&query_str);
 
+    let mut transformed_filter: Option<FilterInput> = None;
+
     match rec_query {
         Ok(query) => {
             // Handle the success case
@@ -187,6 +192,13 @@ pub async fn list_users_handler(
             if let Some(p) = query.page {
                 page = p;
             }
+
+            if let Some(f) = query.filter {
+                let parsed_filter = QueryStringParser::parse_nested_query_string(&f);
+                transformed_filter = Some(QueryStringParser::transform_input_filter(
+                    parsed_filter.as_object().unwrap(),
+                ));
+            }
         }
         Err(e) => {
             // Handle the error case
@@ -195,7 +207,13 @@ pub async fn list_users_handler(
     }
 
     match service
-        .list(projection, None, sort, Some(limit), Some(page))
+        .list(
+            projection,
+            transformed_filter,
+            sort,
+            Some(limit),
+            Some(page),
+        )
         .await
     {
         Ok(users) => (

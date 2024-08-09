@@ -5,23 +5,31 @@ use super::{components::*, enums::*, errors::*, filters::*, statements::*, table
 #[derive(Debug, Clone)]
 pub struct SimpleFilter {
     pub field: String,
-    pub table: String,
+    pub table: Option<String>,
     pub operator: String,
     pub value: SqlValue,
 }
 
 #[derive(Debug, Clone)]
+pub struct ArrayFilter {
+    pub field: String,
+    pub table: Option<String>,
+    pub operator: String,
+    pub values: Vec<SqlValue>,
+}
+
+#[derive(Debug, Clone)]
 pub struct ConditionalFilter {
     pub operator: String,
-    pub filters: Vec<HashMap<String, FilterInput>>,
+    pub filters: Vec<FilterInput>,
 }
 
 #[derive(Debug, Clone)]
 // Represents the input for a filter, which can either be a direct value, a sub-filter, or a list of sub-filters.
 pub enum FilterInput {
-    Value(SqlValue),
-    SubFilter(HashMap<String, FilterInput>),
-    SubFilters(Vec<HashMap<String, FilterInput>>),
+    Simple(SimpleFilter),
+    Array(ArrayFilter),
+    Conditional(ConditionalFilter),
 }
 
 // Define enum to handle both simple and aggregated fields

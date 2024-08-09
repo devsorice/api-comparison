@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 pub mod user;
+pub mod utils;
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize, Serialize, Debug, PartialEq)]
