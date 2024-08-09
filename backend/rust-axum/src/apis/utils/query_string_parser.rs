@@ -39,6 +39,7 @@ impl QueryStringParser {
                     filters.push(Self::parse_filter(key, &s));
                 }
                 Value::Object(map) => {
+                    // Safe to call this recursively since we confirmed it's an object
                     filters.push(Self::transform_input_filter(&map));
                 }
                 Value::Array(arr) => {
@@ -48,7 +49,11 @@ impl QueryStringParser {
                             if let Value::Object(obj) = v {
                                 Self::transform_input_filter(obj)
                             } else {
-                                panic!("Invalid format in array!")
+                                // Handling potential format errors gracefully
+                                return FilterInput::Conditional(ConditionalFilter {
+                                    operator: "error".to_string(),
+                                    filters: Vec::new(),
+                                });
                             }
                         })
                         .collect();
@@ -57,7 +62,13 @@ impl QueryStringParser {
                         filters: sub_filters,
                     }));
                 }
-                _ => panic!("Unhandled value type in input!"),
+                _ => {
+                    // Handling unexpected types gracefully
+                    filters.push(FilterInput::Conditional(ConditionalFilter {
+                        operator: "error".to_string(),
+                        filters: Vec::new(),
+                    }));
+                }
             }
         }
         FilterInput::Conditional(ConditionalFilter {
@@ -75,26 +86,36 @@ impl QueryStringParser {
             let parts: Vec<&str> = trimmed_key.split(']').collect();
 
             for (i, part) in parts.iter().enumerate() {
-                if i == parts.len() - 1 {
-                    // Last part, assign the value
-                    if let Some(inner_part) = part.split('[').next() {
-                        current_map.insert(inner_part.to_string(), Value::String(value.clone()));
+                let inner_part = part.split('[').next();
+
+                if let Some(inner_key) = inner_part {
+                    if i == parts.len() - 1 {
+                        current_map.insert(inner_key.to_string(), Value::String(value.clone()));
+                    } else {
+                        // Manage entry separately to avoid borrow issues
+                        let temp_key = inner_key.to_string();
+                        current_map
+                            .entry(temp_key.clone())
+                            .or_insert_with(|| Value::Object(Map::new()));
+
+                        // Attempt to get a mutable reference to the map
+                        if let Some(obj) = current_map.get_mut(&temp_key).unwrap().as_object_mut() {
+                            current_map = obj;
+                        } else {
+                            // Handle the case where the value is not an object
+                            println!("Expected a map at '{}', but found another type.", temp_key);
+                            return Value::Object(Map::new()); // Consider handling this case more gracefully
+                        }
                     }
                 } else {
-                    // Not last part, navigate or create map
-                    let inner_key = part.split('[').next().unwrap();
-                    current_map = current_map
-                        .entry(inner_key.to_string())
-                        .or_insert_with(|| Value::Object(Map::new()))
-                        .as_object_mut()
-                        .unwrap();
+                    println!("Error processing key: {}", key);
+                    return Value::Object(Map::new()); // Return an empty map for error handling
                 }
             }
         }
 
         Value::Object(root)
     }
-
     pub fn test() {
         // Test setup for TEST 1
         let input1 = json!({

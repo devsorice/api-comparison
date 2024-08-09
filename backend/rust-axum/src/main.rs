@@ -3,9 +3,12 @@ mod database;
 mod exceptions;
 mod services;
 
-use apis::user::{
-    create_user_handler, create_users_handler, delete_user_handler, duplicate_user_handler,
-    get_user_handler, list_users_handler, update_user_handler, update_users_handler,
+use apis::{
+    user::{
+        create_user_handler, create_users_handler, delete_user_handler, duplicate_user_handler,
+        get_user_handler, list_users_handler, update_user_handler, update_users_handler,
+    },
+    utils::query_string_parser::QueryStringParser,
 };
 use axum::{extract::Extension, routing::get, routing::post, Router, Server};
 use log::{error, info};
@@ -14,6 +17,9 @@ use std::net::SocketAddr;
 
 #[tokio::main]
 async fn main() {
+    info!("Starting preliminary tests");
+    QueryStringParser::test();
+
     // Initialize all services
     let services = Services::init().await;
 
