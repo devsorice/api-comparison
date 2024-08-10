@@ -1,4 +1,11 @@
 services:
+  build:
+    image: sorice/rust:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: base
+
   build-test:
     build:
       context: .

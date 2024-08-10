@@ -2,3 +2,12 @@
 name = "crud-api"
 version = "0.1.0"
 edition = "2021"
+
+[dependencies]
+diesel = { version = "2.2.2", features = ["postgres"] }
+
+
+[profile.release]
+strip = true  # Automatically strip symbols from the binary.
+codegen-units = 1
+lto = true
