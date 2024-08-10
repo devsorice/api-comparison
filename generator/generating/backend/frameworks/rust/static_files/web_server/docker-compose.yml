@@ -14,5 +14,5 @@ services:
       dockerfile: Dockerfile
       target: server
     ports:
-      - "8563:80"
+      - "5556:5555"
     restart: always

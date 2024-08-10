@@ -31,16 +31,19 @@ class CrudDahboardRustAxumGenerator(CrudDashboardBackendGenerator):
                              )
 
     def add_model_to_files(self, app, model:RustModel):
-        file = self.model_to_file(f'backend/models/{model.model.slug_singular}.rs', model)
+        file = self.model_to_file(f'backend/generated/models/{model.model.slug_singular}.rs', model)
         app.add_file(file)
 
     def add_main_file(self, app, readfunct):
-        app.add_file(GeneratedFile('backend/main.rs', readfunct))
+        app.add_file(GeneratedFile('backend/generated/main.rs', readfunct))
 
 
     def generate(self, app):
         self.fr = BackendFramewoks.RUST_AXUM
 
+        app.add_static_asset(self.fr, 'web_server/main.rs', 'backend/src/main.rs')
+        app.add_static_asset(self.fr, 'web_server/Cargo.toml', 'backend/Cargo.toml')
+        app.add_static_asset(self.fr, 'web_server/Cargo.lock', 'backend/Cargo.lock')
         app.add_static_asset(self.fr, 'web_server/docker-compose.yml', 'backend/docker-compose.yml')
         app.add_static_asset(self.fr, 'web_server/Dockerfile',         'backend/Dockerfile')
         app.add_file(StringFile('frontend/up.sh', 'docker compose up -d --build --remove-orphans'))
